@@ -29,7 +29,11 @@ if not st.session_state.connected:
         except mysql.connector.Error as e:
             st.error(f"Database connection failed: {e}")
             st.stop()
-            
+
+if st.session_state.connected:
+    conn = st.session_state.conn
+    cur = conn.cursor()
+    
     # --- Fetch data ---
     @st.cache_data
     def run_query(query):
