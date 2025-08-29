@@ -44,16 +44,18 @@ CREATE TABLE TRAIN_STATION (
 );
 
 CREATE TABLE TRAIN_VOLUME (
-    train_volume_id       INT          NOT NULL COMMENT 'train passenger volume id (surrogate PK)',
-    train_volume_year_month DATE       NOT NULL COMMENT 'train passenger volume year-month',
-    train_volume_day      VARCHAR(50)  NOT NULL COMMENT 'train passenger volume day (weekday/weekend/PH)',
-    train_volume_hour     TINYINT      NOT NULL COMMENT 'train passenger volume time in hour',
-    train_code            VARCHAR(4)   NOT NULL COMMENT 'train code',
-    train_volume_tap_in   INT          NOT NULL COMMENT 'train passenger volume tap in',
-    train_volume_tap_out  INT          NOT NULL COMMENT 'train volume passenger volume tap out',
-    CONSTRAINT TRAIN_VOLUME_PK PRIMARY KEY (train_volume_id),
+    train_volume_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    train_volume_year_month DATE NOT NULL COMMENT 'train passenger volume year-month',
+    train_volume_day VARCHAR(50) NOT NULL COMMENT 'train passenger volume day (weekday/weekend/PH)',
+    train_volume_hour TINYINT NOT NULL COMMENT 'train passenger volume time in hour',
+    train_code VARCHAR(4) NOT NULL COMMENT 'train code',
+    train_volume_tap_in INT NOT NULL COMMENT 'train passenger volume tap in',
+    train_volume_tap_out INT NOT NULL COMMENT 'train volume passenger volume tap out',
     CONSTRAINT TRAIN_VOLUME_NK UNIQUE (train_volume_year_month, train_volume_hour, train_volume_day, train_code)
 );
+
+
+ALTER TABLE TRAIN_VOLUME AUTO_INCREMENT = 1;
 
 CREATE TABLE URA (
     ura_area   VARCHAR(50)  NOT NULL COMMENT 'ura planning area',
