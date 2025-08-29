@@ -22,7 +22,6 @@ if not st.session_state.connected:
                 user=user,
                 password=password,
                 host=host,
-                port=3306,
                 database="singapore_mrt_db"
             )
             st.session_state.conn = conn
