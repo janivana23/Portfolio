@@ -56,10 +56,9 @@ if st.session_state.connected:
                 except Exception:
                     pass
 
-        # Extract postcode if train_address exists
         if 'TRAIN_STATION_ADDRESS' in df.columns:
             df['postcode'] = df['TRAIN_STATION_ADDRESS'].apply(
-                lambda x: re.search(r'\b\d{6}\b', x).group() if re.search(r'\b\d{6}\b', x) else None
+                lambda x: re.search(r'\b\d{6}\b', str(x)).group() if re.search(r'\b\d{6}\b', str(x)) else None
             )
 
         return df
