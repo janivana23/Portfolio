@@ -12,7 +12,7 @@ if not st.session_state.connected:
     with st.form("db_form"):
         user = st.text_input("Username")
         password = st.text_input("Password", type="password")
-        host = st.text_input("Host", value="localhost")   # MySQL uses host instead of DSN
+        host = st.text_input("Host", value="127.0.0.1")   
         submit = st.form_submit_button("Connect")
 
     if submit:
@@ -33,7 +33,7 @@ if not st.session_state.connected:
 if st.session_state.connected:
     conn = st.session_state.conn
     cur = conn.cursor()
-    
+
     # --- Fetch data ---
     @st.cache_data
     def run_query(query):
