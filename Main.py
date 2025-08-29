@@ -76,7 +76,8 @@ if st.session_state.connected:
 
     if table in data_options:
         query = f"SELECT * FROM {table}"
-        df = run_query(query).upper()
+        df = run_query(query)
+        df.columns = df.columns.str.upper()
 
         # --- Sidebar Filters ---
         st.sidebar.header("Filters")
