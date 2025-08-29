@@ -3,8 +3,6 @@ cx_Oracle
 pandas
 oracledb
 pydeck
-math
 matplotlib
 seaborn
 mysql-connector-python
-mysql-connector
