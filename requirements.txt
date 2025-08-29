@@ -3,7 +3,6 @@ cx_Oracle
 pandas
 oracledb
 pydeck
-re
 math
 matplotlib
 seaborn
