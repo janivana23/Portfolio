@@ -8,4 +8,4 @@ conn = mysql.connector.connect(
     database=st.secrets["mysql"]["database"],
 )
 
-st.success("✅ Connected successfully with secrets.toml")
+st.write("Connected:", conn.is_connected())
