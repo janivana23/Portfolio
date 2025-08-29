@@ -7,3 +7,5 @@ re
 math
 matplotlib
 seaborn
+mysql-connector-python
+mysql-connector

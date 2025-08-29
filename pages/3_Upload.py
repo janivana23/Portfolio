@@ -1,5 +1,5 @@
 import streamlit as st
-import oracledb
+import mysql.connector
 import pandas as pd
 
 st.title("Upload CSV to Oracle")
@@ -12,16 +12,21 @@ if not st.session_state.connected:
     with st.form("db_form"):
         user = st.text_input("Username")
         password = st.text_input("Password", type="password")
-        dsn = st.text_input("DSN")
+        host = st.text_input("Host", value="localhost")   # MySQL uses host instead of DSN
         submit = st.form_submit_button("Connect")
 
     if submit:
         try:
-            conn = oracledb.connect(user=user, password=password, dsn=dsn)
-            st.session_state.conn = conn  # store in session_state
+            conn = mysql.connector.connect(
+                user=user,
+                password=password,
+                host=host,
+                database="singapore_mrt_db"  # database name
+            )
+            st.session_state.conn = conn
             st.session_state.connected = True
-            st.success("✅ Connected to Oracle database!")
-        except oracledb.DatabaseError as e:
+            st.success("✅ Connected to MySQL Database!")
+        except mysql.connector.Error as e:
             st.error(f"Database connection failed: {e}")
 
 # --- Step 2: Upload CSV ---
@@ -63,7 +68,6 @@ if st.session_state.connected:
             for _, row in df_expanded.iterrows():
                 cur.execute("""
                     INSERT INTO TRAIN_VOLUME (
-                        train_volume_id,
                         train_volume_year_month,
                         train_volume_day,
                         train_volume_hour,
@@ -71,8 +75,7 @@ if st.session_state.connected:
                         train_volume_tap_in,
                         train_volume_tap_out
                     ) VALUES (
-                        TRAIN_VOLUME_SEQ.nextval,
-                        TO_DATE(:1, 'YYYY-MM'),
+                        STR_TO_DATE(:1, '%Y-%m-%d'),
                         :2, :3, :4, :5, :6
                     )
                 """, (
