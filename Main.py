@@ -30,8 +30,8 @@ if not st.session_state.connected:
 
     if submit:
         try:
-            conn = oracledb.connect(user=user, password=password, dsn=dsn)
-        except oracledb.DatabaseError as e:
+            conn = mysql.connector.connect(user=user, password=password, host=dsn)
+        except mysql.connector.Error as e:
             st.error(f"Database connection failed: {e}")
             # --- Fetch data ---
 
