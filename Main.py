@@ -3,19 +3,6 @@ import pandas as pd
 import mysql.connector
 import re
 
-root = st.text_input("username")
-password = st.text_input("Password", type="password")
-
-# Create connection
-conn = mysql.connector.connect(
-    host="localhost",     #server IP
-    user=root,          #MySQL username
-    password=password,  #sql password
-    database="singapore_mrt_db"    # database name
-)
-
-cursor = conn.cursor()
-
 
 # --- Step 1: Get credentials ---
 if "connected" not in st.session_state:
