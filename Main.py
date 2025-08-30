@@ -12,6 +12,7 @@ DB_PASSWORD = st.secrets["mysql"]["password"]
 DB_HOST = st.secrets["mysql"]["host"]
 DB_NAME = st.secrets["mysql"]["database"]
 DB_PORT = 3306
+DB_CA = st.secrets["mysql"]["ca"]
 
 
 conn = mysql.connector.connect(
@@ -19,7 +20,8 @@ conn = mysql.connector.connect(
     password=DB_PASSWORD,
     host=DB_HOST,
     database=DB_NAME,
-    port=DB_PORT
+    port=DB_PORT,
+    ssl_ca=DB_CA
 )
 cur = conn.cursor(buffered=True)
 
