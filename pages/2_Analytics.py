@@ -47,6 +47,10 @@ if st.session_state.connected:
         rows = cur.fetchall()
         df = pd.DataFrame(rows, columns=cols)
         df.columns = df.columns.str.lower()
+        # Ensure coordinates are float
+        df["lat"] = pd.to_numeric(df["lat"], errors="coerce")
+        df["lon"] = pd.to_numeric(df["lon"], errors="coerce")
+        df["train_start_operation"] = pd.to_datetime(df["train_start_operation"], errors="coerce")
 
         return df
 
@@ -61,7 +65,7 @@ if st.session_state.connected:
     # --- Stations Opened per Year ---
     st.subheader("Stations Opened per Year")
 
-    stations_per_year = df.groupby(df['train_start_operation'].dt.year).size()
+    stations_per_year = df.groupby(df['train_start_operation']).size()
 
     fig, ax = plt.subplots()
     stations_per_year.plot(kind="bar", ax=ax)
