@@ -61,7 +61,7 @@ if st.session_state.connected:
         for col in ["TOTAL_TAP_IN_VOLUME", "TOTAL_TAP_OUT_VOLUME", "TIME_PER_HOUR"]:
             df_expanded[col] = pd.to_numeric(df_expanded[col], errors="coerce")
             df_expanded[col] = df_expanded[col].fillna(0).astype(int)
-            
+
         rows_qty = len(df_expanded)
         st.write("Preview after splitting multi-line train codes:")
         st.write(f"Total rows after splitting: {rows_qty}")
@@ -87,10 +87,10 @@ if st.session_state.connected:
                 """, (
                     row["YEAR_MONTH"],
                     row["DAY_TYPE"],
-                    hour,
+                    row["TIME_PER_HOUR"],
                     row["PT_CODE"],
-                    tap_in,
-                    tap_out
+                    row["TOTAL_TAP_IN_VOLUME"],
+                    row["TOTAL_TAP_OUT_VOLUME"]
                 ))
             conn.commit()
             st.success("✅ Data inserted into database!")
