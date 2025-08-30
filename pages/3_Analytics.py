@@ -13,6 +13,7 @@ if "connected" not in st.session_state:
 
 if not st.session_state.connected:
     with st.form("db_form"):
+        st.write("Enter your MySQL Database credentials:")
         user = st.text_input("Username")
         password = st.text_input("Password", type="password")
         host = "singaporemrtserver.mysql.database.azure.com"

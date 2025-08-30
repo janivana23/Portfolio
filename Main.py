@@ -13,6 +13,7 @@ DB_HOST = st.secrets["mysql"]["host"]
 DB_NAME = st.secrets["mysql"]["database"]
 DB_PORT = 3306
 
+
 conn = mysql.connector.connect(
     user=DB_USER,
     password=DB_PASSWORD,
@@ -137,6 +138,16 @@ elif page == "Login":
             st.session_state.logged_in = True
             st.session_state.username = username
             st.success(f"Welcome {username}!")
+            conn = mysql.connector.connect(
+                user=DB_USER,
+                password=DB_PASSWORD,
+                host=DB_HOST,
+                database=DB_NAME,
+                port=DB_PORT
+            )
+            st.session_state.conn = conn
+            st.session_state.connected = True
+            st.success("✅ Connected to MySQL Database!")
         elif status == "unverified":
             st.error("Please verify your email first.")
         elif status == "wrong":
