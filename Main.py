@@ -36,8 +36,6 @@ if not st.session_state.connected:
 
 # Optional: show connection status
 if st.session_state.connected:
-    st.write("Connected! You can now run queries.")
-
     conn = st.session_state.conn
     cur = conn.cursor()
 
@@ -49,6 +47,7 @@ if st.session_state.connected:
         cols = [col[0] for col in cur.description]  # column names
         rows = cur.fetchall()
         df = pd.DataFrame(rows, columns=cols)
+        df.columns = df.columns.str.upper()
 
         # Automatically convert object columns to datetime if possible
         for col in df.columns:
@@ -78,7 +77,6 @@ if st.session_state.connected:
     if table in data_options:
         query = f"SELECT * FROM {table}"
         df = run_query(query)
-        df.columns = df.columns.str.upper()
 
         # --- Sidebar Filters ---
         st.sidebar.header("Filters")
