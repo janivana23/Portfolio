@@ -7,3 +7,4 @@ matplotlib
 seaborn
 mysql-connector-python
 EmailMessage
+bcrypt
