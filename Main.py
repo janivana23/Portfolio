@@ -20,7 +20,7 @@ conn = mysql.connector.connect(
 cur = conn.cursor()
 
 # --- Check if URL contains token (verification) ---
-token = st.experimental_get_query_params().get("token", [None])[0]
+token = st.query_params.get("token", [None])[0]
 if token:
     cur.execute("UPDATE users SET is_verified=TRUE WHERE verification_token=%s", (token,))
     conn.commit()
