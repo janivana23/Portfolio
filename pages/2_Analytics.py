@@ -48,8 +48,11 @@ if st.session_state.connected:
         df = pd.DataFrame(rows, columns=cols)
         df.columns = df.columns.str.lower()
         # Ensure coordinates are float
-        df["lat"] = pd.to_numeric(df["lat"], errors="coerce")
-        df["lon"] = pd.to_numeric(df["lon"], errors="coerce")
+        df["train_volume_tap_in"] = pd.to_numeric(df["train_volume_tap_in"], errors="coerce")
+        df["train_volume_tap_out"] = pd.to_numeric(df["train_volume_tap_out"], errors="coerce")
+        df["train_station_lat"] = pd.to_numeric(df["train_station_lat"], errors="coerce")
+        df["train_station_long"] = pd.to_numeric(df["train_station_long"], errors="coerce")
+
         df["train_start_operation"] = pd.to_datetime(df["train_start_operation"], errors="coerce")
 
         return df
