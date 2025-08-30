@@ -217,10 +217,6 @@ if st.session_state.connected:
         zoom_level = max(15 - max(lat_range, lon_range)*100, 10)
 
 
-        st.write("Column dtypes before map:", map_df.dtypes)
-        st.write(map_df.head(3).to_dict())
-
-
         #PyDeck Map
         st.pydeck_chart(pdk.Deck(
             map_style='light',

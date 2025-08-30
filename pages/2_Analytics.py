@@ -55,6 +55,9 @@ if st.session_state.connected:
     df = run_query(query1)
 
 
+    st.write("Column dtypes", df.dtypes)
+    st.write(df.head(3).to_dict())
+
     # --- Stations Opened per Year ---
     st.subheader("Stations Opened per Year")
 
