@@ -65,7 +65,9 @@ if st.session_state.connected:
         rows_qty = len(df_expanded)
         st.write("Preview after splitting multi-line train codes:")
         st.write(f"Total rows after splitting: {rows_qty}")
-        
+        st.write("Data types after conversion:")
+        st.write(df_expanded.dtypes)
+
         st.dataframe(df_expanded.head())
 
         st.write ("Make sure your csv file heading is listed below in order:")
