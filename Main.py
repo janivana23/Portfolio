@@ -2,6 +2,9 @@ import streamlit as st
 import mysql.connector
 import uuid
 from passlib.context import CryptContext
+import smtplib
+import ssl
+import random
 
 # --- Password hashing ---
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -22,72 +25,95 @@ conn = mysql.connector.connect(
 )
 cur = conn.cursor()
 
+st.header("Sign Up or Sign In to access the Database")
+
 # --- Helpers ---
-def create_user(username, email, password):
-    token = str(uuid.uuid4())
-    hashed = pwd_context.hash(password)
-    cur.execute("""
-        INSERT INTO users (username, email, password_hash, verification_token, is_verified)
-        VALUES (%s, %s, %s, %s, %s)
-    """, (username, email, hashed, token, False))
+def create_user(username, password, email):
+    st.subheader("Create your account")
+    cur.execute(f"CREATE USER '{username}'@'%' IDENTIFIED BY '{password}';")
+    # Streamlit UI
+    if st.button("Send Verification Token"):
+        if email:
+            token = random.randint(100000, 999999)  # 6-digit token
+            send_token_email(email, token)
+            st.success(f"Verification token sent to {email}!")
+        else:
+            st.error("Please enter a valid email.")
     conn.commit()
     return token
 
-def verify_token(token):
-    cur.execute("SELECT username FROM users WHERE verification_token=%s", (token,))
-    result = cur.fetchone()
-    if result:
-        cur.execute("UPDATE users SET is_verified=TRUE, verification_token=NULL WHERE verification_token=%s", (token,))
-        conn.commit()
-        return True
-    return False
+# --- Email Function ---
+# Email config (store safely in st.secrets in production!)
+SENDER_EMAIL = st.secrets["email"]["address"]
+APP_PASSWORD = st.secrets["email"]["app_password"]
 
-def login_user(username, password):
-    cur.execute("SELECT password_hash, is_verified FROM users WHERE username=%s", (username,))
-    result = cur.fetchone()
-    if result:
-        hashed_pw, is_verified = result
-        if not is_verified:
-            return "unverified"
-        if pwd_context.verify(password, hashed_pw):
-            return "success"
-    return "fail"
+def send_token_email(receiver_email, token):
+    subject = "Your Verification Token"
+    body = f"Here is your verification token: {token}"
+
+    message = f"Subject: {subject}\n\n{body}"
+
+    context = ssl.create_default_context()
+    with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=context) as server:
+        server.login(SENDER_EMAIL, APP_PASSWORD)
+        server.sendmail(SENDER_EMAIL, receiver_email, message)
+
+def verify_token(token):
+    st.subheader("Verify your account")
+    username = st.text_input("Username", key="su_username")
+    password = st.text_input("Password", type="password", key="su_password")
+    email = st.text_input("Enter your email")
+    token = create_user(username, password, email)
+    token_input = st.text_input("Enter your verification token")
+    if st.button("Verify"):
+        if token_input == token:
+            token = True
+            st.success("Your email is verified! You can now log in.")
+            return token
+        else:
+            st.error("Invalid token.")
+
+def login_user(host):
+    if not st.session_state.connected:
+        with st.form("db_form"):
+            user = st.text_input("Username")
+            password = st.text_input("Password", type="password")
+            port=3306
+            submit = st.form_submit_button("Connect")
+
+        if submit:
+            try:
+                conn = mysql.connector.connect(
+                    user=user,
+                    password=password,
+                    host=host,
+                    port=port,
+                    database="singapore_mrt_db"
+                )
+                st.session_state.conn = conn
+                st.session_state.connected = True
+                st.success("✅ Connected to MySQL Database!")
+            except mysql.connector.Error as e:
+                st.error(f"Database connection failed: {e}")
+                print(f"MySQL connection error: {e}")  # useful for debugging
+                st.stop()
+    if st.session_state.connected:
+        conn = st.session_state.conn
+        cur = conn.cursor()
+        cur.execute(f"GRANT ALL PRIVILEGES ON singapore_mrt_db.* TO '{user}'@'%';")
+        conn.commit()
+
 
 # --- Streamlit App ---
 st.title("Community Sign Up & Login")
 
-page = st.sidebar.selectbox("Page", ["Sign Up", "Verify Email", "Login"])
+page = st.sidebar.selectbox("Page", ["Sign Up", "Login"])
 
 if page == "Sign Up":
-    st.subheader("Create your account")
-    username = st.text_input("Username", key="su_username")
-    email = st.text_input("Email", key="su_email")
-    password = st.text_input("Password", type="password", key="su_password")
-    if st.button("Sign Up"):
-        token = create_user(username, email, password)
-        st.success("Account created! Copy this verification token and go to 'Verify Email' page.")
-        st.info(f"Your token: {token}")
-
-elif page == "Verify Email":
-    st.subheader("Verify your account")
-    token_input = st.text_input("Enter your verification token")
-    if st.button("Verify"):
-        if verify_token(token_input):
-            st.success("Your email is verified! You can now log in.")
-        else:
-            st.error("Invalid token.")
+    token = verify_token(token=None)
+    if token:
+        st.success("You can now log in using your credentials.")
+        login_user(host=DB_HOST)
 
 elif page == "Login":
-    st.subheader("Login to your account")
-    login_user_input = st.text_input("Username", key="li_username")
-    login_pass_input = st.text_input("Password", type="password", key="li_password")
-    if st.button("Login"):
-        status = login_user(login_user_input, login_pass_input)
-        if status == "success":
-            st.session_state.logged_in = True
-            st.session_state.username = login_user_input
-            st.success(f"Welcome {login_user_input}!")
-        elif status == "unverified":
-            st.error("Please verify your email before logging in.")
-        else:
-            st.error("Invalid username or password.")
+    login_user(host=DB_HOST)
