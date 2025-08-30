@@ -13,11 +13,11 @@ DROP TABLE IF EXISTS TRAIN_STATION;
 DROP TABLE IF EXISTS URA;
 
 CREATE TABLE TRAIN (
-    train_code            VARCHAR(4)   NOT NULL COMMENT 'train code',
-    train_name            VARCHAR(50)  NOT NULL COMMENT 'train name',
-    train_line_name       VARCHAR(50)  NOT NULL COMMENT 'train line name',
-    train_start_operation DATE         NOT NULL COMMENT 'train starting operation',
-    train_station_address VARCHAR(200) NOT NULL COMMENT 'train station address',
+    train_code            VARCHAR(4)   NOT NULL,
+    train_name            VARCHAR(50)  NOT NULL,
+    train_line_name       VARCHAR(50)  NOT NULL,
+    train_start_operation DATE          NOT NULL,
+    train_station_address VARCHAR(200) NOT NULL,
     CONSTRAINT TRAIN_PK PRIMARY KEY (train_code),
     CONSTRAINT chk_train_line CHECK (train_line_name IN (
         'Bukit Panjang LRT',
@@ -35,31 +35,34 @@ CREATE TABLE TRAIN (
 );
 
 CREATE TABLE TRAIN_STATION (
-    train_station_address VARCHAR(200) NOT NULL COMMENT 'train station address',
-    train_station_lat     DECIMAL(10,9) NOT NULL COMMENT 'train station latitude',
-    train_station_long    DECIMAL(10,7) NOT NULL COMMENT 'train station longitude',
-    ura_area              VARCHAR(50)  NOT NULL COMMENT 'ura planning area',
+    train_station_address VARCHAR(200) NOT NULL,
+    train_station_lat     DECIMAL(10,9)  NOT NULL,
+    train_station_long    DECIMAL(10,7)  NOT NULL,
+    ura_area              VARCHAR(50)  NOT NULL,
     CONSTRAINT TRAIN_STATION_PK PRIMARY KEY (train_station_address),
     CONSTRAINT TRAIN_STATION_UQ UNIQUE (train_station_lat, train_station_long)
 );
 
 CREATE TABLE TRAIN_VOLUME (
-    train_volume_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    train_volume_year_month DATE NOT NULL COMMENT 'train passenger volume year-month',
-    train_volume_day VARCHAR(50) NOT NULL COMMENT 'train passenger volume day (weekday/weekend/PH)',
-    train_volume_hour TINYINT NOT NULL COMMENT 'train passenger volume time in hour',
-    train_code VARCHAR(4) NOT NULL COMMENT 'train code',
-    train_volume_tap_in INT NOT NULL COMMENT 'train passenger volume tap in',
-    train_volume_tap_out INT NOT NULL COMMENT 'train volume passenger volume tap out',
-    CONSTRAINT TRAIN_VOLUME_NK UNIQUE (train_volume_year_month, train_volume_hour, train_volume_day, train_code)
+    train_volume_id INT AUTO_INCREMENT PRIMARY KEY,
+    train_volume_year_month DATE NOT NULL,
+    train_volume_day VARCHAR(50) NOT NULL,
+    train_volume_hour INT NOT NULL,
+    train_code VARCHAR(4) NOT NULL,
+    train_volume_tap_in INT NOT NULL,
+    train_volume_tap_out INT NOT NULL,
+    CONSTRAINT TRAIN_VOLUME_NK UNIQUE (
+        train_volume_year_month,
+        train_volume_hour,
+        train_volume_day,
+        train_code
+    )
 );
 
 
-ALTER TABLE TRAIN_VOLUME AUTO_INCREMENT = 1;
-
 CREATE TABLE URA (
-    ura_area   VARCHAR(50)  NOT NULL COMMENT 'ura planning area',
-    ura_region VARCHAR(100) NOT NULL COMMENT 'ura region',
+    ura_area   VARCHAR(50)   NOT NULL,
+    ura_region VARCHAR(100)  NOT NULL,
     CONSTRAINT URA_PK PRIMARY KEY (ura_area),
     CONSTRAINT chk_ura_region CHECK (ura_region IN (
         'CENTRAL REGION',
