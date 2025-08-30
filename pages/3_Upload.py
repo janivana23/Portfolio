@@ -77,8 +77,8 @@ if st.session_state.connected:
                         train_volume_tap_in,
                         train_volume_tap_out
                     ) VALUES (
-                        STR_TO_DATE(:1, '%Y-%m-%d'),
-                        :2, :3, :4, :5, :6
+                        STR_TO_DATE(%s, '%%Y-%%m-%%d'),
+                        %s, %s, %s, %s, %s
                     )
                 """, (
                     row["YEAR_MONTH"],
