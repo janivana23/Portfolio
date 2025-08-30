@@ -40,7 +40,7 @@ if st.session_state.connected:
     conn = st.session_state.conn
     cur = conn.cursor()
     @st.cache_data
-    def run_query(query):
+    def run_query(query, listdtype):
         cur = conn.cursor()
         cur.execute(query)
         cols = [col[0] for col in cur.description]  # column names
@@ -48,18 +48,18 @@ if st.session_state.connected:
         df = pd.DataFrame(rows, columns=cols)
         df.columns = df.columns.str.lower()
         # Ensure coordinates are float
-        df["train_volume_tap_in"] = pd.to_numeric(df["train_volume_tap_in"], errors="coerce")
-        df["train_volume_tap_out"] = pd.to_numeric(df["train_volume_tap_out"], errors="coerce")
-        df["train_station_lat"] = pd.to_numeric(df["train_station_lat"], errors="coerce")
-        df["train_station_long"] = pd.to_numeric(df["train_station_long"], errors="coerce")
-
-        df["train_start_operation"] = pd.to_datetime(df["train_start_operation"], errors="coerce")
+        for col, dtype in listdtype:
+            if dtype == "float" or dtype == "int":
+                df[col] = pd.to_numeric(df[col], errors="coerce")
+            elif dtype == "datetime":
+                df[col] = pd.to_datetime(df[col], errors="coerce")
 
         return df
 
     #-----------------------------------------------------------------------------------------
     query1 = "SELECT * FROM TRAIN_STATION NATURAL JOIN TRAIN NATURAL JOIN URA"
-    df = run_query(query1)
+    listdtype = [("train_station_lat", "float"), ("train_station_long", "float"), ("train_start_operation", "datetime")]
+    df = run_query(query1, listdtype)
 
 
     st.write("Column dtypes", df.dtypes)
@@ -103,7 +103,9 @@ if st.session_state.connected:
 
     # ---------------------------------------------------------------------------------------
     query2 = "SELECT * FROM TRAIN NATURAL JOIN TRAIN_VOLUME"
-    df = run_query(query2)
+    listdtype = [("train_volume_tap_in", "int"), ("train_volume_tap_out", "int"), ("train_start_operation", "datetime")]
+
+    df = run_query(query2, listdtype)
     df.columns = df.columns.str.lower()
 
     # --- Top 10 Busiest Stations ---
