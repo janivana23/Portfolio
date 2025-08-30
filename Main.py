@@ -1,55 +1,31 @@
 import streamlit as st
 import mysql.connector
-from passlib.context import CryptContext
 import smtplib
 import ssl
 import random
 
-# --- Password hashing ---
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
-# --- Database connection using Streamlit secrets ---
+# --- Database connection ---
 DB_USER = st.secrets["mysql"]["user"]
 DB_PASSWORD = st.secrets["mysql"]["password"]
 DB_HOST = st.secrets["mysql"]["host"]
 DB_NAME = st.secrets["mysql"]["database"]
-DB_PORT = 3306
 
 conn = mysql.connector.connect(
     user=DB_USER,
     password=DB_PASSWORD,
     host=DB_HOST,
     database=DB_NAME,
-    port=DB_PORT
+    port=3306
 )
 cur = conn.cursor()
 
-st.header("Sign Up or Sign In to access the Database")
-
-# --- Helpers ---
-def create_user(username, password, email):
-    st.subheader("Create your account")
-    cur.execute(f"CREATE USER '{username}'@'%' IDENTIFIED BY '{password}';")
-    # Streamlit UI
-    if st.button("Send Verification Token"):
-        if email:
-            token = random.randint(100000, 999999)  # 6-digit token
-            send_token_email(email, token)
-            st.success(f"Verification token sent to {email}!")
-        else:
-            st.error("Please enter a valid email.")
-    conn.commit()
-    return token
-
-# --- Email Function ---
-# Email config (store safely in st.secrets in production!)
+# --- Email Config ---
 SENDER_EMAIL = st.secrets["email"]["address"]
 APP_PASSWORD = st.secrets["email"]["app_password"]
 
 def send_token_email(receiver_email, token):
     subject = "Your Verification Token"
     body = f"Here is your verification token: {token}"
-
     message = f"Subject: {subject}\n\n{body}"
 
     context = ssl.create_default_context()
@@ -57,62 +33,69 @@ def send_token_email(receiver_email, token):
         server.login(SENDER_EMAIL, APP_PASSWORD)
         server.sendmail(SENDER_EMAIL, receiver_email, message)
 
-def verify_token(token):
-    st.subheader("Verify your account")
-    username = st.text_input("Username", key="su_username")
-    password = st.text_input("Password", type="password", key="su_password")
-    email = st.text_input("Enter your email")
-    token = create_user(username, password, email)
-    token_input = st.text_input("Enter your verification token")
-    if st.button("Verify"):
-        if token_input == token:
-            token = True
-            st.success("Your email is verified! You can now log in.")
-            return token
-        else:
-            st.error("Invalid token.")
+# --- Create user (insert into DB) ---
+def create_user(username, password, email):
+    token = str(random.randint(100000, 999999))  # 6-digit token
+    cur.execute(
+        "INSERT INTO users (username, password, email, is_verified, token) VALUES (%s, %s, %s, %s, %s)",
+        (username, password, email, False, token)
+    )
+    conn.commit()
+    send_token_email(email, token)
+    return token
 
-def login_user(host):
-    if not st.session_state.connected:
-        with st.form("db_form"):
-            user = st.text_input("Username")
-            password = st.text_input("Password", type="password")
-            port=3306
-            submit = st.form_submit_button("Connect")
-
-        if submit:
-            try:
-                conn = mysql.connector.connect(
-                    user=user,
-                    password=password,
-                    host=host,
-                    port=port,
-                    database="singapore_mrt_db"
-                )
-                st.session_state.conn = conn
-                st.session_state.connected = True
-                st.success("✅ Connected to MySQL Database!")
-            except mysql.connector.Error as e:
-                st.error(f"Database connection failed: {e}")
-                print(f"MySQL connection error: {e}")  # useful for debugging
-                st.stop()
-    if st.session_state.connected:
-        conn = st.session_state.conn
-        cur = conn.cursor()
-        cur.execute(f"GRANT ALL PRIVILEGES ON singapore_mrt_db.* TO '{user}'@'%';")
+# --- Verify token ---
+def verify_user(username, token_input):
+    cur.execute("SELECT token FROM users WHERE username=%s", (username,))
+    result = cur.fetchone()
+    if result and result[0] == token_input:
+        cur.execute("UPDATE users SET is_verified=%s WHERE username=%s", (True, username))
         conn.commit()
+        return True
+    return False
 
+# --- Login ---
+def login_user(username, password):
+    cur.execute("SELECT password, is_verified FROM users WHERE username=%s", (username,))
+    result = cur.fetchone()
+    if result:
+        stored_pw, is_verified = result
+        if not is_verified:
+            st.error("Please verify your email before logging in.")
+            return False
+        elif password == stored_pw:  # TODO: hash + bcrypt in production
+            st.session_state.logged_in = True
+            st.session_state.username = username
+            return True
+    return False
 
 # --- Streamlit App ---
 st.title("Community Sign Up & Login")
 
-page = st.sidebar.selectbox("Page", ["Sign Up", "Login"])
+page = st.sidebar.selectbox("Page", ["Sign Up", "Verify", "Login"])
 
 if page == "Sign Up":
-    token = verify_token(token=123456)
-    if token:
-        st.success("You can now log in using your credentials.")
-        login_user(host=DB_HOST)
+    username = st.text_input("Username")
+    password = st.text_input("Password", type="password")
+    email = st.text_input("Email")
+    if st.button("Sign Up"):
+        token = create_user(username, password, email)
+        st.info(f"A verification token was sent to {email}. Please check your inbox.")
+
+elif page == "Verify":
+    username = st.text_input("Username")
+    token_input = st.text_input("Verification Token")
+    if st.button("Verify"):
+        if verify_user(username, token_input):
+            st.success("Your account is verified! You can now log in.")
+        else:
+            st.error("Invalid token.")
 
 elif page == "Login":
-    login_user(host=DB_HOST)
+    username = st.text_input("Username")
+    password = st.text_input("Password", type="password")
+    if st.button("Login"):
+        if login_user(username, password):
+            st.success(f"Welcome {username}!")
+        else:
+            st.error("Login failed.")
