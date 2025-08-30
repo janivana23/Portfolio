@@ -1,7 +1,10 @@
 import streamlit as st
 import mysql.connector
-import bcrypt
 import uuid
+from passlib.context import CryptContext
+
+# --- Password hashing ---
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 # --- Database connection using Streamlit secrets ---
 DB_USER = st.secrets["mysql"]["user"]
@@ -19,62 +22,72 @@ conn = mysql.connector.connect(
 )
 cur = conn.cursor()
 
-# --- Check if URL contains token (verification) ---
-token = st.query_params.get("token", [None])[0]
-if token:
-    cur.execute("UPDATE users SET is_verified=TRUE WHERE verification_token=%s", (token,))
+# --- Helpers ---
+def create_user(username, email, password):
+    token = str(uuid.uuid4())
+    hashed = pwd_context.hash(password)
+    cur.execute("""
+        INSERT INTO users (username, email, password_hash, verification_token, is_verified)
+        VALUES (%s, %s, %s, %s, %s)
+    """, (username, email, hashed, token, False))
     conn.commit()
-    st.success("✅ Your account has been verified! You can now log in.")
+    return token
 
-st.title("🚇 MRT App: Signup & Login")
+def verify_token(token):
+    cur.execute("SELECT username FROM users WHERE verification_token=%s", (token,))
+    result = cur.fetchone()
+    if result:
+        cur.execute("UPDATE users SET is_verified=TRUE, verification_token=NULL WHERE verification_token=%s", (token,))
+        conn.commit()
+        return True
+    return False
 
-# --- Signup Section ---
-st.subheader("Sign Up")
-signup_username = st.text_input("Username", key="signup_username")
-signup_email = st.text_input("Email", key="signup_email")
-signup_password = st.text_input("Password", type="password", key="signup_password")
+def login_user(username, password):
+    cur.execute("SELECT password_hash, is_verified FROM users WHERE username=%s", (username,))
+    result = cur.fetchone()
+    if result:
+        hashed_pw, is_verified = result
+        if not is_verified:
+            return "unverified"
+        if pwd_context.verify(password, hashed_pw):
+            return "success"
+    return "fail"
 
-if st.button("Sign Up"):
-    if signup_username and signup_email and signup_password:
-        # Check if username or email exists
-        cur.execute("SELECT * FROM users WHERE username=%s OR email=%s", (signup_username, signup_email))
-        if cur.fetchone():
-            st.error("❌ Username or email already exists.")
+# --- Streamlit App ---
+st.title("Community Sign Up & Login")
+
+page = st.sidebar.selectbox("Page", ["Sign Up", "Verify Email", "Login"])
+
+if page == "Sign Up":
+    st.subheader("Create your account")
+    username = st.text_input("Username", key="su_username")
+    email = st.text_input("Email", key="su_email")
+    password = st.text_input("Password", type="password", key="su_password")
+    if st.button("Sign Up"):
+        token = create_user(username, email, password)
+        st.success("Account created! Copy this verification token and go to 'Verify Email' page.")
+        st.info(f"Your token: {token}")
+
+elif page == "Verify Email":
+    st.subheader("Verify your account")
+    token_input = st.text_input("Enter your verification token")
+    if st.button("Verify"):
+        if verify_token(token_input):
+            st.success("Your email is verified! You can now log in.")
         else:
-            hashed = bcrypt.hashpw(signup_password.encode('utf-8'), bcrypt.gensalt())
-            verification_token = str(uuid.uuid4())
-            cur.execute("""
-                INSERT INTO users (username, email, password_hash, verification_token)
-                VALUES (%s, %s, %s, %s)
-            """, (signup_username, signup_email, hashed, verification_token))
-            conn.commit()
-            # Display verification link in app
-            verification_link = f"{st.get_url()}?token={verification_token}"
-            st.success("✅ Account created!")
-            st.info(f"Click the link below to verify your account:\n\n[{verification_link}]({verification_link})")
-    else:
-        st.warning("⚠️ Please fill in all signup fields.")
+            st.error("Invalid token.")
 
-# --- Login Section ---
-st.subheader("Login")
-login_user = st.text_input("Username", key="login_user")
-login_pass = st.text_input("Password", type="password", key="login_pass")
-
-if st.button("Login"):
-    if login_user and login_pass:
-        cur.execute("SELECT password_hash, is_verified FROM users WHERE username=%s", (login_user,))
-        result = cur.fetchone()
-        if not result:
-            st.error("❌ Username does not exist.")
+elif page == "Login":
+    st.subheader("Login to your account")
+    login_user_input = st.text_input("Username", key="li_username")
+    login_pass_input = st.text_input("Password", type="password", key="li_password")
+    if st.button("Login"):
+        status = login_user(login_user_input, login_pass_input)
+        if status == "success":
+            st.session_state.logged_in = True
+            st.session_state.username = login_user_input
+            st.success(f"Welcome {login_user_input}!")
+        elif status == "unverified":
+            st.error("Please verify your email before logging in.")
         else:
-            hashed_pw, is_verified = result
-            if not is_verified:
-                st.warning("⚠️ Please verify your account first.")
-            elif bcrypt.checkpw(login_pass.encode('utf-8'), hashed_pw.encode('utf-8')):
-                st.session_state.logged_in = True
-                st.session_state.username = login_user
-                st.success(f"✅ Welcome {login_user}!")
-            else:
-                st.error("❌ Incorrect password.")
-    else:
-        st.warning("⚠️ Please fill in all login fields.")
+            st.error("Invalid username or password.")
