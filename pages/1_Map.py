@@ -214,6 +214,9 @@ if st.session_state.connected:
             elif pd.api.types.is_float_dtype(map_df[col]):
                 map_df[col] = map_df[col].astype(float)
 
+        st.write("Column dtypes before map:", map_df.dtypes)
+        st.write(map_df.head(3).to_dict())
+
         #PyDeck Map
         st.pydeck_chart(pdk.Deck(
             map_style='light',
