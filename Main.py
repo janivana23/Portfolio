@@ -1,124 +1,80 @@
 import streamlit as st
-import pandas as pd
 import mysql.connector
-import re
+import bcrypt
+import uuid
 
+# --- Database connection using Streamlit secrets ---
+DB_USER = st.secrets["mysql"]["user"]
+DB_PASSWORD = st.secrets["mysql"]["password"]
+DB_HOST = st.secrets["mysql"]["host"]
+DB_NAME = st.secrets["mysql"]["database"]
+DB_PORT = 3306
 
-# --- Step 1: Get credentials ---
+conn = mysql.connector.connect(
+    user=DB_USER,
+    password=DB_PASSWORD,
+    host=DB_HOST,
+    database=DB_NAME,
+    port=DB_PORT
+)
+cur = conn.cursor()
 
-if "connected" not in st.session_state:
-    st.session_state.connected = False
+# --- Check if URL contains token (verification) ---
+token = st.experimental_get_query_params().get("token", [None])[0]
+if token:
+    cur.execute("UPDATE users SET is_verified=TRUE WHERE verification_token=%s", (token,))
+    conn.commit()
+    st.success("✅ Your account has been verified! You can now log in.")
 
-if not st.session_state.connected:
-    with st.form("db_form"):
-        user = st.text_input("Username")
-        password = st.text_input("Password", type="password")
-        host = "singaporemrtserver.mysql.database.azure.com"
-        port=3306
-        submit = st.form_submit_button("Connect")
+st.title("🚇 MRT App: Signup & Login")
 
-    if submit:
-        try:
-            conn = mysql.connector.connect(
-                user=user,
-                password=password,
-                host=host,
-                port=port,
-                database="singapore_mrt_db"
-            )
-            st.session_state.conn = conn
-            st.session_state.connected = True
-            st.success("✅ Connected to MySQL Database!")
-        except mysql.connector.Error as e:
-            st.error(f"Database connection failed: {e}")
-            print(f"MySQL connection error: {e}")  # useful for debugging
-            st.stop()
+# --- Signup Section ---
+st.subheader("Sign Up")
+signup_username = st.text_input("Username", key="signup_username")
+signup_email = st.text_input("Email", key="signup_email")
+signup_password = st.text_input("Password", type="password", key="signup_password")
 
-# Optional: show connection status
-if st.session_state.connected:
-    conn = st.session_state.conn
-    cur = conn.cursor()
+if st.button("Sign Up"):
+    if signup_username and signup_email and signup_password:
+        # Check if username or email exists
+        cur.execute("SELECT * FROM users WHERE username=%s OR email=%s", (signup_username, signup_email))
+        if cur.fetchone():
+            st.error("❌ Username or email already exists.")
+        else:
+            hashed = bcrypt.hashpw(signup_password.encode('utf-8'), bcrypt.gensalt())
+            verification_token = str(uuid.uuid4())
+            cur.execute("""
+                INSERT INTO users (username, email, password_hash, verification_token)
+                VALUES (%s, %s, %s, %s)
+            """, (signup_username, signup_email, hashed, verification_token))
+            conn.commit()
+            # Display verification link in app
+            verification_link = f"{st.get_url()}?token={verification_token}"
+            st.success("✅ Account created!")
+            st.info(f"Click the link below to verify your account:\n\n[{verification_link}]({verification_link})")
+    else:
+        st.warning("⚠️ Please fill in all signup fields.")
 
-    # --- Fetch data ---
-    @st.cache_data
-    def run_query(query):
-        cur = conn.cursor()
-        cur.execute(query)
-        cols = [col[0] for col in cur.description]  # column names
-        rows = cur.fetchall()
-        df = pd.DataFrame(rows, columns=cols)
-        df.columns = df.columns.str.upper()
+# --- Login Section ---
+st.subheader("Login")
+login_user = st.text_input("Username", key="login_user")
+login_pass = st.text_input("Password", type="password", key="login_pass")
 
-        # Automatically convert object columns to datetime if possible
-        for col in df.columns:
-            if pd.api.types.is_object_dtype(df[col]):
-                try:
-                    df[col] = pd.to_datetime(df[col])
-                except Exception:
-                    pass
-
-        if 'TRAIN_STATION_ADDRESS' in df.columns:
-            df['postcode'] = df['TRAIN_STATION_ADDRESS'].apply(
-                lambda x: re.search(r'\b\d{6}\b', str(x)).group() if re.search(r'\b\d{6}\b', str(x)) else None
-            )
-
-        return df
-
-    # --- Streamlit UI ---
-    st.title("🚇 MRT Portfolio Dashboard")
-    st.header("Singapore Train Network Data Viewer")
-
-    st.write("Select a table to view:")
-    st.write("1. TRAIN\n2. URA\n3. TRAIN_STATION\n4. TRAIN_VOLUME")
-
-    data_options = ['TRAIN', 'URA', 'TRAIN_STATION', 'TRAIN_VOLUME']
-    table = st.text_input("Enter table name", "").upper()
-
-    if table in data_options:
-        query = f"SELECT * FROM {table}"
-        df = run_query(query)
-
-        # --- Sidebar Filters ---
-        st.sidebar.header("Filters")
-        selections = {}
-        filtered_df = df.copy()
-
-        for idx, col in enumerate(df.columns):
-            if pd.api.types.is_datetime64_any_dtype(df[col]):
-                # Date column → filter by year
-                years = df[col].dt.year.unique()
-                selected_years = st.sidebar.multiselect(
-                    f"Select {col} Year(s)", sorted(years), key=f"filter_{col}_{idx}"
-                )
-                selections[col] = selected_years
-                if selected_years:
-                    filtered_df = filtered_df[filtered_df[col].dt.year.isin(selected_years)]
-
-            elif col == 'TRAIN_STATION_ADDRESS' and 'postcode' in df.columns:
-                # Use postcode for filtering instead of full address
-                postcodes = sorted(df['postcode'].dropna().unique())
-                selected_postcodes = st.sidebar.multiselect(
-                    "Select Postcode(s)", postcodes, key=f"filter_postcode_{idx}"
-                )
-                selections['postcode'] = selected_postcodes
-                if selected_postcodes:
-                    filtered_df = filtered_df[filtered_df['postcode'].isin(selected_postcodes)]
-
-            elif col != 'postcode':
-                opts = sorted(df[col].dropna().unique())
-                selected_opts = st.sidebar.multiselect(
-                    f"Select {col}", opts, key=f"filter_{col}_{idx}"
-                )
-                selections[col] = selected_opts
-                if selected_opts:
-                    filtered_df = filtered_df[filtered_df[col].isin(selected_opts)]
-
-        # --- Display filtered & sorted data ---
-        st.subheader("Data Viewing")
-        # Drop postcode column before displaying
-        display_df = filtered_df.drop(columns=['postcode'], errors='ignore')
-
-        st.dataframe(display_df, use_container_width=True)
-
-    elif table:
-        st.error("Please enter a valid table name from the options above.")
+if st.button("Login"):
+    if login_user and login_pass:
+        cur.execute("SELECT password_hash, is_verified FROM users WHERE username=%s", (login_user,))
+        result = cur.fetchone()
+        if not result:
+            st.error("❌ Username does not exist.")
+        else:
+            hashed_pw, is_verified = result
+            if not is_verified:
+                st.warning("⚠️ Please verify your account first.")
+            elif bcrypt.checkpw(login_pass.encode('utf-8'), hashed_pw.encode('utf-8')):
+                st.session_state.logged_in = True
+                st.session_state.username = login_user
+                st.success(f"✅ Welcome {login_user}!")
+            else:
+                st.error("❌ Incorrect password.")
+    else:
+        st.warning("⚠️ Please fill in all login fields.")

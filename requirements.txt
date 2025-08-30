@@ -6,3 +6,6 @@ pydeck
 matplotlib
 seaborn
 mysql-connector-python
+bcrypt
+smtplib
+EmailMessage
