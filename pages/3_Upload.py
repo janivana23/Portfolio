@@ -67,6 +67,16 @@ if st.session_state.connected:
         st.write ("Make sure your csv file heading is listed below in order:")
         st.write("YEAR_MONTH, DAY_TYPE, TIME_PER_HOUR, PT_CODE, TOTAL_TAP_IN_VOLUME, TOTAL_TAP_OUT_VOLUME")
         if st.button("Insert into TRAIN_VOLUME"):
+            def safe_int(val):
+                try:
+                    return int(val)
+                except:
+                    return None
+
+            tap_in = safe_int(row["TOTAL_TAP_IN_VOLUME"])
+            tap_out = safe_int(row["TOTAL_TAP_OUT_VOLUME"])
+            hour = safe_int(row["TIME_PER_HOUR"])
+
             for _, row in df_expanded.iterrows():
                 cur.execute("""
                     INSERT INTO TRAIN_VOLUME (
@@ -77,16 +87,15 @@ if st.session_state.connected:
                         train_volume_tap_in,
                         train_volume_tap_out
                     ) VALUES (
-                        STR_TO_DATE(%s, '%%Y-%%m-%%d'),
-                        %s, %s, %s, %s, %s
+                        %s, %s, %s, %s, %s, %s
                     )
                 """, (
                     row["YEAR_MONTH"],
                     row["DAY_TYPE"],
-                    row["TIME_PER_HOUR"],
+                    hour,
                     row["PT_CODE"],
-                    row["TOTAL_TAP_IN_VOLUME"],
-                    row["TOTAL_TAP_OUT_VOLUME"]
+                    tap_in,
+                    tap_out
                 ))
             conn.commit()
             st.success("✅ Data inserted into database!")
