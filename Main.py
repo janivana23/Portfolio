@@ -113,12 +113,6 @@ if st.session_state.connected:
                 if selected_opts:
                     filtered_df = filtered_df[filtered_df[col].isin(selected_opts)]
 
-        # --- Sorting Options ---
-        st.sidebar.header("Sort Options")
-        sort_col = st.sidebar.selectbox("Sort by column", df.columns.tolist())
-        ascending = st.sidebar.radio("Sort order", ("Ascending", "Descending")) == "Ascending"
-        filtered_df = filtered_df.sort_values(by=sort_col, ascending=ascending)
-
         # --- Display filtered & sorted data ---
         st.subheader("Data Viewing")
         # Drop postcode column before displaying

@@ -16,7 +16,8 @@ if not st.session_state.connected:
     with st.form("db_form"):
         user = st.text_input("Username")
         password = st.text_input("Password", type="password")
-        host = st.text_input("Host", value="127.0.0.1")   # MySQL uses host instead of DSN
+        host = "singaporemrtserver.mysql.database.azure.com"
+        port=3306
         submit = st.form_submit_button("Connect")
 
     if submit:
@@ -25,6 +26,7 @@ if not st.session_state.connected:
                 user=user,
                 password=password,
                 host=host,
+                port=port,
                 database="singapore_mrt_db"  # database name
             )
             st.session_state.conn = conn
