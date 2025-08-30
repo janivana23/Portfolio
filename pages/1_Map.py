@@ -115,6 +115,17 @@ if st.session_state.connected:
         # Get unique values based on color_by selection
         unique_values = map_df[color_by].dropna().unique()
 
+        # Ensure coordinates are float
+        map_df["lat"] = pd.to_numeric(map_df["lat"], errors="coerce")
+        map_df["lon"] = pd.to_numeric(map_df["lon"], errors="coerce")
+
+        # Drop any rows where coords are missing
+        map_df = map_df.dropna(subset=["lat", "lon"])
+
+        # Ensure color is a plain list, not object dtype
+        map_df["color"] = map_df["color"].apply(lambda x: list(x) if not isinstance(x, list) else x)
+
+
         if color_by == 'TRAIN_LINE_NAME':
             # Train line to official MRT color
             color_map = {
@@ -209,14 +220,6 @@ if st.session_state.connected:
         st.write("Column dtypes before map:", map_df.dtypes)
         st.write(map_df.head(3).to_dict())
 
-        # --- FIX: make map_df JSON-serializable ---
-        for col in map_df.columns:
-            if pd.api.types.is_datetime64_any_dtype(map_df[col]):
-                map_df[col] = map_df[col].astype(str)
-            elif pd.api.types.is_integer_dtype(map_df[col]):
-                map_df[col] = map_df[col].astype(int)
-            elif pd.api.types.is_float_dtype(map_df[col]):
-                map_df[col] = map_df[col].astype(float)
 
         #PyDeck Map
         st.pydeck_chart(pdk.Deck(
