@@ -122,10 +122,6 @@ if st.session_state.connected:
         # Drop any rows where coords are missing
         map_df = map_df.dropna(subset=["lat", "lon"])
 
-        # Ensure color is a plain list, not object dtype
-        map_df["color"] = map_df["color"].apply(lambda x: list(x) if not isinstance(x, list) else x)
-
-
         if color_by == 'TRAIN_LINE_NAME':
             # Train line to official MRT color
             color_map = {
@@ -175,7 +171,11 @@ if st.session_state.connected:
 
             #Header Legend for URA REGION
             st.subheader("URA Region Legend")
-            
+
+
+        # Ensure color is a plain list, not object dtype
+        map_df["color"] = map_df["color"].apply(lambda x: list(x) if not isinstance(x, list) else x)
+
 
         # Determine number of columns per row
         cols_per_row = 4  # adjust based on screen width
