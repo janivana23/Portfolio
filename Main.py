@@ -104,7 +104,7 @@ if st.session_state.connected:
                 if selected_postcodes:
                     filtered_df = filtered_df[filtered_df['postcode'].isin(selected_postcodes)]
 
-            else:
+            elif col != 'postcode':
                 opts = sorted(df[col].dropna().unique())
                 selected_opts = st.sidebar.multiselect(
                     f"Select {col}", opts, key=f"filter_{col}_{idx}"
