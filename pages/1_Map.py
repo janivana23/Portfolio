@@ -205,6 +205,15 @@ if st.session_state.connected:
         lon_range = map_df['lon'].max() - map_df['lon'].min()
         zoom_level = max(15 - max(lat_range, lon_range)*100, 10)
 
+        # --- FIX: make map_df JSON-serializable ---
+        for col in map_df.columns:
+            if pd.api.types.is_datetime64_any_dtype(map_df[col]):
+                map_df[col] = map_df[col].astype(str)
+            elif pd.api.types.is_integer_dtype(map_df[col]):
+                map_df[col] = map_df[col].astype(int)
+            elif pd.api.types.is_float_dtype(map_df[col]):
+                map_df[col] = map_df[col].astype(float)
+
         #PyDeck Map
         st.pydeck_chart(pdk.Deck(
             map_style='light',
