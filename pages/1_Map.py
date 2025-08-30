@@ -47,6 +47,8 @@ if st.session_state.connected:
         cols = [col[0] for col in cur.description]
         rows = cur.fetchall()
         df = pd.DataFrame(rows, columns=cols)
+        df.columns = df.columns.str.upper()
+
         for col in df.columns:
             if pd.api.types.is_object_dtype(df[col]):
                 try:

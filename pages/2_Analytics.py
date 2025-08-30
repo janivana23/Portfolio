@@ -46,12 +46,13 @@ if st.session_state.connected:
         cols = [col[0] for col in cur.description]  # column names
         rows = cur.fetchall()
         df = pd.DataFrame(rows, columns=cols)
+        df.columns = df.columns.str.lower()
+
         return df
 
     #-----------------------------------------------------------------------------------------
     query1 = "SELECT * FROM TRAIN_STATION NATURAL JOIN TRAIN NATURAL JOIN URA"
     df = run_query(query1)
-    df.columns = df.columns.str.lower()
 
 
     # --- Stations Opened per Year ---
