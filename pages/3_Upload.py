@@ -62,6 +62,8 @@ if st.session_state.connected:
             df_expanded[col] = pd.to_numeric(df_expanded[col], errors="coerce")
             df_expanded[col] = df_expanded[col].fillna(0).astype(int)
 
+        df_expanded["YEAR_MONTH"] = pd.to_datetime(df_expanded["YEAR_MONTH"], errors="coerce")
+
         rows_qty = len(df_expanded)
         st.write("Preview after splitting multi-line train codes:")
         st.write(f"Total rows after splitting: {rows_qty}")
