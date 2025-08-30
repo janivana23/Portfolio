@@ -1,6 +1,5 @@
 import streamlit as st
 import mysql.connector
-import uuid
 from passlib.context import CryptContext
 import smtplib
 import ssl
@@ -110,7 +109,7 @@ st.title("Community Sign Up & Login")
 page = st.sidebar.selectbox("Page", ["Sign Up", "Login"])
 
 if page == "Sign Up":
-    token = verify_token(token=None)
+    token = verify_token(token=123456)
     if token:
         st.success("You can now log in using your credentials.")
         login_user(host=DB_HOST)
