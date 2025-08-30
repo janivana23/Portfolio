@@ -58,6 +58,10 @@ if st.session_state.connected:
                     "TOTAL_TAP_OUT_VOLUME": row["TOTAL_TAP_OUT_VOLUME"]
                 })
         df_expanded = pd.DataFrame(new_rows)
+        for col in ["TOTAL_TAP_IN_VOLUME", "TOTAL_TAP_OUT_VOLUME", "TIME_PER_HOUR"]:
+            df_expanded[col] = pd.to_numeric(df_expanded[col], errors="coerce")
+            df_expanded[col] = df_expanded[col].fillna(0).astype(int)
+            
         rows_qty = len(df_expanded)
         st.write("Preview after splitting multi-line train codes:")
         st.write(f"Total rows after splitting: {rows_qty}")
@@ -67,15 +71,6 @@ if st.session_state.connected:
         st.write ("Make sure your csv file heading is listed below in order:")
         st.write("YEAR_MONTH, DAY_TYPE, TIME_PER_HOUR, PT_CODE, TOTAL_TAP_IN_VOLUME, TOTAL_TAP_OUT_VOLUME")
         if st.button("Insert into TRAIN_VOLUME"):
-            def safe_int(val):
-                try:
-                    return int(val)
-                except:
-                    return None
-
-            tap_in = safe_int(row["TOTAL_TAP_IN_VOLUME"])
-            tap_out = safe_int(row["TOTAL_TAP_OUT_VOLUME"])
-            hour = safe_int(row["TIME_PER_HOUR"])
 
             for _, row in df_expanded.iterrows():
                 cur.execute("""
