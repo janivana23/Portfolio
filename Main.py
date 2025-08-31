@@ -132,7 +132,7 @@ with st.sidebar.expander("🔒 Account"):
     st.markdown("### Manage Account")
     row1 = st.columns(2)
     with row1[0]:
-        st.button("📝 Sign Up", use_container_width=True, on_click=open_auth, args=("Sign Up",))
+        st.button("📝 Sign-Up", use_container_width=True, on_click=open_auth, args=("Sign Up",))
     with row1[1]:
         st.button("🔑 Login", use_container_width=True, on_click=open_auth, args=("Login",))
 
