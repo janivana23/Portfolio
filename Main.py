@@ -117,7 +117,19 @@ def upload_page():
 # -------------------- Streamlit App --------------------
 st.title("Community Sign Up & Login")
 
-page = st.sidebar.selectbox("Page", ["Sign Up", "Verify Email", "Login", "Data", "Map", "Analytics", "Download", "Upload"])
+pages = ["Sign Up", "Verify Email", "Login", "Data", "Map", "Analytics", "Download", "Upload"]
+
+st.sidebar.title("Navigation")
+
+for p in pages:
+    if st.sidebar.button(p):
+        st.session_state.page = p  # store in session_state
+
+# Default page if not set
+if "page" not in st.session_state:
+    st.session_state.page = "Login"
+
+page = st.session_state.page
 
 if page == "Sign Up":
     st.subheader("Create your account")
