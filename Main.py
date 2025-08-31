@@ -129,13 +129,14 @@ st.sidebar.title("Main Navigation")
 
 
 with st.sidebar.expander("🔒 Account"):
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        st.button("Sign Up", use_container_width=True, on_click=open_auth, args=("Sign Up",))
-    with col2:
-        st.button("Verify", use_container_width=True, on_click=open_auth, args=("Verify Email",))
-    with col3:
-        st.button("Login", use_container_width=True, on_click=open_auth, args=("Login",))
+    st.markdown("### Manage Account")
+    row1 = st.columns(2)
+    with row1[0]:
+        st.button("📝 Sign Up", use_container_width=True, on_click=open_auth, args=("Sign Up",))
+    with row1[1]:
+        st.button("🔑 Login", use_container_width=True, on_click=open_auth, args=("Login",))
+
+    st.button("📧 Verify Email", use_container_width=True, on_click=open_auth, args=("Verify Email",))
 
 # Always visible main pages
 page = st.sidebar.radio(
