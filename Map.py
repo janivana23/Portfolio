@@ -5,44 +5,23 @@ import pydeck as pdk
 import math
 import re
 
-st.title("🚇 MRT Station Map")
+def app():
+    # -------------------- Database Connection --------------------
+    DB_USER = st.secrets["mysql"]["user"]
+    DB_PASSWORD = st.secrets["mysql"]["password"]
+    DB_HOST = st.secrets["mysql"]["host"]
+    DB_NAME = st.secrets["mysql"]["database"]
+    DB_PORT = 3306
+    DB_CA = st.secrets["mysql"]["ca"]
 
-
-# --- Step 1: Get credentials ---
-if "connected" not in st.session_state:
-    st.session_state.connected = False
-
-if not st.session_state.connected:
-    with st.form("db_form"):
-        st.write("Enter your MySQL Database credentials:")
-
-        user = st.text_input("Username")
-        password = st.text_input("Password", type="password")
-        host = "singaporemrtserver.mysql.database.azure.com"
-        port=3306
-        submit = st.form_submit_button("Connect")
-
-    if submit:
-        try:
-            conn = mysql.connector.connect(
-                user=user,
-                password=password,
-                host=host,
-                port=port,
-                database="singapore_mrt_db"  # database name
-            )
-            st.session_state.conn = conn
-            st.session_state.connected = True
-            st.success("✅ Connected to MySQL Database!")
-        except mysql.connector.Error as e:
-            st.error(f"Database connection failed: {e}")
-
-
-# --- Fetch data ---
-
-if st.session_state.connected:
-    conn = st.session_state.conn
-    cur = conn.cursor()
+    conn = mysql.connector.connect(
+        user=DB_USER,
+        password=DB_PASSWORD,
+        host=DB_HOST,
+        database=DB_NAME,
+        port=DB_PORT,
+        ssl_ca=DB_CA
+    )
     
     @st.cache_data
     def run_query(query):

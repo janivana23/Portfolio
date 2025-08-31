@@ -6,6 +6,13 @@ import ssl
 import random
 from datetime import datetime, timedelta
 
+# -------------------- Python File ----------------------------
+import Data
+import Map
+import Analytics
+import Download
+import Upload
+
 # -------------------- Database Connection --------------------
 DB_USER = st.secrets["mysql"]["user"]
 DB_PASSWORD = st.secrets["mysql"]["password"]
@@ -91,7 +98,7 @@ def login_user(username, password):
 # -------------------- Streamlit App --------------------
 st.title("Community Sign Up & Login")
 
-page = st.sidebar.selectbox("Page", ["Sign Up", "Verify Email", "Login"])
+page = st.sidebar.selectbox("Page", ["Sign Up", "Verify Email", "Login", "Data", "Map", "Analytics", "Download", "Upload"])
 
 if page == "Sign Up":
     st.subheader("Create your account")
@@ -157,3 +164,16 @@ elif page == "Login":
         else:
             st.error("User not found.")
 
+elif page == "Data":
+    Data.app()  # function inside data.py
+elif page == "Analytics":
+    Analytics.app()
+elif page == "Map":
+    Map.app()
+elif page == "Upload":
+    if st.session_state.logged_in:
+        Upload.app()
+    else: 
+        st.write ("Please login before you can upload into the database")
+elif page == "Download":
+    Download.app()

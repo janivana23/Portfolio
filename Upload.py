@@ -4,37 +4,24 @@ import pandas as pd
 
 st.title("Upload CSV to Oracle")
 
-# --- Step 1: Get credentials ---
-if "connected" not in st.session_state:
-    st.session_state.connected = False
+def app():
+    # -------------------- Database Connection --------------------
+    DB_USER = st.secrets["mysql"]["user"]
+    DB_PASSWORD = st.secrets["mysql"]["password"]
+    DB_HOST = st.secrets["mysql"]["host"]
+    DB_NAME = st.secrets["mysql"]["database"]
+    DB_PORT = 3306
+    DB_CA = st.secrets["mysql"]["ca"]
 
-if not st.session_state.connected:
-    with st.form("db_form"):
-        st.write("Enter your MySQL Database credentials:")
-        user = st.text_input("Username")
-        password = st.text_input("Password", type="password")
-        host = "singaporemrtserver.mysql.database.azure.com"
-        port=3306
-        submit = st.form_submit_button("Connect")
+    conn = mysql.connector.connect(
+        user=DB_USER,
+        password=DB_PASSWORD,
+        host=DB_HOST,
+        database=DB_NAME,
+        port=DB_PORT,
+        ssl_ca=DB_CA
+    )
 
-    if submit:
-        try:
-            conn = mysql.connector.connect(
-                user=user,
-                password=password,
-                host=host,
-                port=port,
-                database="singapore_mrt_db"
-            )
-            st.session_state.conn = conn
-            st.session_state.connected = True
-            st.success("✅ Connected to MySQL Database!")
-        except mysql.connector.Error as e:
-            st.error(f"Database connection failed: {e}")
-
-# --- Step 2: Upload CSV ---
-if st.session_state.connected:
-    conn = st.session_state.conn
     cur = conn.cursor()
 
     uploaded_file = st.file_uploader("Choose CSV", type="csv")
