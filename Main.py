@@ -120,7 +120,6 @@ def upload_page():
 st.sidebar.title("Navigation")
 
 page = st.sidebar.radio(
-    "Navigation",
     ["Sign Up", "Verify Email", "Login", "Data", "Map", "Analytics", "Download", "Upload"]
 )
 
