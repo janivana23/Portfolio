@@ -95,6 +95,25 @@ def login_user(username, password):
     else:
         return "notfound"
 
+# --- Example session state setup ---
+if "logged_in" not in st.session_state:
+    st.session_state.logged_in = False
+
+def require_login(func):
+    """Decorator to protect pages that require login."""
+    def wrapper(*args, **kwargs):
+        if st.session_state.logged_in:
+            return func(*args, **kwargs)
+        else:
+            st.warning("⚠️ Please login before you can access this page.")
+            st.info("Go to the Login page from the sidebar.")
+    return wrapper
+
+# Protect the upload page
+@require_login
+def upload_page():
+    Upload.app()
+
 # -------------------- Streamlit App --------------------
 st.title("Community Sign Up & Login")
 
@@ -171,9 +190,6 @@ elif page == "Analytics":
 elif page == "Map":
     Map.app()
 elif page == "Upload":
-    if st.session_state.logged_in:
-        Upload.app()
-    else: 
-        st.write ("Please login before you can upload into the database")
+    upload_page()
 elif page == "Download":
     Download.app()
