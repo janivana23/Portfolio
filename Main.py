@@ -116,19 +116,13 @@ def upload_page():
 
 # -------------------- Streamlit App --------------------
 
-pages = ["Sign Up", "Verify Email", "Login", "Data", "Map", "Analytics", "Download", "Upload"]
 
 st.sidebar.title("Navigation")
 
-for p in pages:
-    if st.sidebar.button(p):
-        st.session_state.page = p  # store in session_state
-
-# Default page if not set
-if "page" not in st.session_state:
-    st.session_state.page = "Login"
-
-page = st.session_state.page
+page = st.sidebar.radio(
+    "Navigation",
+    ["Sign Up", "Verify Email", "Login", "Data", "Map", "Analytics", "Download", "Upload"]
+)
 
 if page == "Sign Up":
     st.title("Community Sign Up & Login")
