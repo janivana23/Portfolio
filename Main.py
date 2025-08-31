@@ -116,14 +116,24 @@ def upload_page():
 
 # -------------------- Streamlit App --------------------
 
+st.sidebar.title("Main Navigation")
 
-st.sidebar.title("Navigation")
-
+# Always visible main pages
 page = st.sidebar.radio(
-    ["Sign Up", "Verify Email", "Login", "Data", "Map", "Analytics", "Download", "Upload"]
+    "Go to",
+    ["Data", "Map", "Analytics", "Download", "Upload"]
 )
 
-if page == "Sign Up":
+# Hidden auth pages inside collapsible menu
+with st.sidebar.expander("🔒 Account"):
+    auth_page = st.radio(
+        "Authentication",
+        ["Sign Up", "Verify Email", "Login"],
+        label_visibility="collapsed"  # hides the label
+    )
+
+
+if auth_page == "Sign Up":
     st.title("Community Sign Up & Login")
     st.subheader("Create your account")
     username = st.text_input("Username", key="su_user")
@@ -142,7 +152,7 @@ if page == "Sign Up":
         else:
             st.error("Please fill in all fields.")
 
-elif page == "Verify Email":
+elif auth_page == "Verify Email":
     st.header("Verify your Email Page")
     username = st.text_input("Username for verification", key="v_user")
     token_input = st.text_input("Enter verification token", key="v_token")
@@ -161,7 +171,7 @@ elif page == "Verify Email":
         else:
             st.error("Username not found.")
 
-elif page == "Login":
+elif auth_page == "Login":
     st.title("Community Sign Up & Login")
     st.subheader("Login")
     username = st.text_input("Username", key="li_user")
