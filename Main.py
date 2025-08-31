@@ -115,7 +115,6 @@ def upload_page():
     Upload.app()
 
 # -------------------- Streamlit App --------------------
-st.title("Community Sign Up & Login")
 
 pages = ["Sign Up", "Verify Email", "Login", "Data", "Map", "Analytics", "Download", "Upload"]
 
@@ -132,6 +131,7 @@ if "page" not in st.session_state:
 page = st.session_state.page
 
 if page == "Sign Up":
+    st.title("Community Sign Up & Login")
     st.subheader("Create your account")
     username = st.text_input("Username", key="su_user")
     email = st.text_input("Email", key="su_email")
@@ -150,7 +150,7 @@ if page == "Sign Up":
             st.error("Please fill in all fields.")
 
 elif page == "Verify Email":
-    st.subheader("Verify your email")
+    st.header("Verify your Email Page")
     username = st.text_input("Username for verification", key="v_user")
     token_input = st.text_input("Enter verification token", key="v_token")
     if st.button("Verify"):
@@ -169,6 +169,7 @@ elif page == "Verify Email":
             st.error("Username not found.")
 
 elif page == "Login":
+    st.title("Community Sign Up & Login")
     st.subheader("Login")
     username = st.text_input("Username", key="li_user")
     password = st.text_input("Password", type="password", key="li_pass")

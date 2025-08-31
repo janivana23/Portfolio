@@ -47,9 +47,7 @@ def app():
     listdtype = [("train_station_lat", "float"), ("train_station_long", "float"), ("train_start_operation", "datetime")]
     df = run_query(query1, listdtype)
 
-
-    st.write("Column dtypes", df.dtypes)
-    st.write(df.head(3).to_dict())
+    st.title("🚇 Singapore Train Station Visual Analytics")
 
     # --- Stations Opened per Year ---
     st.subheader("Stations Opened per Year")

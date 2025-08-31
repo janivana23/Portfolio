@@ -83,9 +83,9 @@ def app():
 
 
     # Map visualization
-    if 'TRAIN_STATION_LAT' in filtered_df.columns and 'TRAIN_STATION_LONG' in filtered_df.columns:
-        st.subheader("Interactive MRT Station Map")
+    st.title("🚇 Interactive MRT Station Map")
 
+    if 'TRAIN_STATION_LAT' in filtered_df.columns and 'TRAIN_STATION_LONG' in filtered_df.columns:
         # Rename for pydeck
         map_df = filtered_df.rename(columns={'TRAIN_STATION_LAT':'lat','TRAIN_STATION_LONG':'lon'})
 
