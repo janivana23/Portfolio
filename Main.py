@@ -124,88 +124,90 @@ page = st.sidebar.radio(
     ["Data", "Map", "Analytics", "Download", "Upload"]
 )
 
-# Hidden auth pages inside collapsible menu
 with st.sidebar.expander("🔒 Account"):
     auth_page = st.radio(
         "Authentication",
-        ["Sign Up", "Verify Email", "Login"],
-        label_visibility="collapsed"  # hides the label
+        ["None", "Sign Up", "Verify Email", "Login"],  # add "None" default
+        index=0,
+        label_visibility="collapsed"
     )
 
 
-if auth_page == "Sign Up":
-    st.title("Community Sign Up & Login")
-    st.subheader("Create your account")
-    username = st.text_input("Username", key="su_user")
-    email = st.text_input("Email", key="su_email")
-    password = st.text_input("Password", type="password", key="su_pass")
-    if st.button("Sign Up"):
-        if username and email and password:
-            cur.execute("SELECT id FROM users WHERE username=%s OR email=%s", (username, email))
-            if cur.fetchone():
-                st.error("Username or Email already exists.")
+# --- Routing ---
+if auth_page != "None":
+    if auth_page == "Sign Up":
+        st.title("Community Sign Up & Login")
+        st.subheader("Create your account")
+        username = st.text_input("Username", key="su_user")
+        email = st.text_input("Email", key="su_email")
+        password = st.text_input("Password", type="password", key="su_pass")
+        if st.button("Sign Up"):
+            if username and email and password:
+                cur.execute("SELECT id FROM users WHERE username=%s OR email=%s", (username, email))
+                if cur.fetchone():
+                    st.error("Username or Email already exists.")
+                else:
+                    user_id = create_user(username, email, password)
+                    token = generate_token(user_id)
+                    send_token_email(email, token)
+                    st.success(f"Account created! Verification token sent to {email}.")
             else:
-                user_id = create_user(username, email, password)
-                token = generate_token(user_id)
-                send_token_email(email, token)
-                st.success(f"Account created! Verification token sent to {email}.")
-        else:
-            st.error("Please fill in all fields.")
+                st.error("Please fill in all fields.")
 
-elif auth_page == "Verify Email":
-    st.header("Verify your Email Page")
-    username = st.text_input("Username for verification", key="v_user")
-    token_input = st.text_input("Enter verification token", key="v_token")
-    if st.button("Verify"):
-        cur.execute("SELECT id FROM users WHERE username=%s", (username,))
-        user = cur.fetchone()
-        if user:
-            user_id = user[0]
-            status = verify_token_db(user_id, token_input)
-            if status == "verified":
-                st.success("Email verified! You can now log in.")
-            elif status == "expired":
-                st.error("Token expired. Please sign up again.")
+    elif auth_page == "Verify Email":
+        st.header("Verify your Email Page")
+        username = st.text_input("Username for verification", key="v_user")
+        token_input = st.text_input("Enter verification token", key="v_token")
+        if st.button("Verify"):
+            cur.execute("SELECT id FROM users WHERE username=%s", (username,))
+            user = cur.fetchone()
+            if user:
+                user_id = user[0]
+                status = verify_token_db(user_id, token_input)
+                if status == "verified":
+                    st.success("Email verified! You can now log in.")
+                elif status == "expired":
+                    st.error("Token expired. Please sign up again.")
+                else:
+                    st.error("Invalid token.")
             else:
-                st.error("Invalid token.")
-        else:
-            st.error("Username not found.")
+                st.error("Username not found.")
 
-elif auth_page == "Login":
-    st.title("Community Sign Up & Login")
-    st.subheader("Login")
-    username = st.text_input("Username", key="li_user")
-    password = st.text_input("Password", type="password", key="li_pass")
-    if st.button("Login"):
-        status = login_user(username, password)
-        if status == "success":
-            st.session_state.logged_in = True
-            st.session_state.username = username
-            st.success(f"Welcome {username}!")
-            conn = mysql.connector.connect(
-                user=DB_USER,
-                password=DB_PASSWORD,
-                host=DB_HOST,
-                database=DB_NAME,
-                port=DB_PORT
-            )
-            st.session_state.conn = conn
-            st.session_state.connected = True
-            st.success("✅ Connected to MySQL Database!")
-        elif status == "unverified":
-            st.error("Please verify your email first.")
-        elif status == "wrong":
-            st.error("Incorrect password.")
-        else:
-            st.error("User not found.")
-
-elif page == "Data":
-    Data.app()  # function inside data.py
-elif page == "Analytics":
-    Analytics.app()
-elif page == "Map":
-    Map.app()
-elif page == "Upload":
-    upload_page()
-elif page == "Download":
-    Download.app()
+    elif auth_page == "Login":
+        st.title("Community Sign Up & Login")
+        st.subheader("Login")
+        username = st.text_input("Username", key="li_user")
+        password = st.text_input("Password", type="password", key="li_pass")
+        if st.button("Login"):
+            status = login_user(username, password)
+            if status == "success":
+                st.session_state.logged_in = True
+                st.session_state.username = username
+                st.success(f"Welcome {username}!")
+                conn = mysql.connector.connect(
+                    user=DB_USER,
+                    password=DB_PASSWORD,
+                    host=DB_HOST,
+                    database=DB_NAME,
+                    port=DB_PORT
+                )
+                st.session_state.conn = conn
+                st.session_state.connected = True
+                st.success("✅ Connected to MySQL Database!")
+            elif status == "unverified":
+                st.error("Please verify your email first.")
+            elif status == "wrong":
+                st.error("Incorrect password.")
+            else:
+                st.error("User not found.")
+else:
+    if page == "Data":
+        Data.app() 
+    elif page == "Analytics":
+        Analytics.app()
+    elif page == "Map":
+        Map.app()
+    elif page == "Upload":
+        upload_page()
+    elif page == "Download":
+        Download.app()
