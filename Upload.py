@@ -69,25 +69,30 @@ def app():
         st.write("YEAR_MONTH, DAY_TYPE, TIME_PER_HOUR, PT_CODE, TOTAL_TAP_IN_VOLUME, TOTAL_TAP_OUT_VOLUME")
         if st.button("Insert into TRAIN_VOLUME"):
 
-            for _, row in df_expanded.iterrows():
-                cur.execute("""
-                    INSERT INTO TRAIN_VOLUME (
-                        train_volume_year_month,
-                        train_volume_day,
-                        train_volume_hour,
-                        train_code,
-                        train_volume_tap_in,
-                        train_volume_tap_out
-                    ) VALUES (
-                        %s, %s, %s, %s, %s, %s
-                    )
-                """, (
-                    row["YEAR_MONTH"],
-                    row["DAY_TYPE"],
-                    row["TIME_PER_HOUR"],
-                    row["PT_CODE"],
-                    row["TOTAL_TAP_IN_VOLUME"],
-                    row["TOTAL_TAP_OUT_VOLUME"]
-                ))
-            conn.commit()
-            st.success("✅ Data inserted into database!")
+            try:
+                for _, row in df_expanded.iterrows():
+                    cur.execute("""
+                        INSERT INTO TRAIN_VOLUME (
+                            TRAIN_LINE,
+                            STATION_CODE,
+                            STATION_NAME,
+                            DATE,
+                            TOTAL_TAP_IN_VOLUME,
+                            TOTAL_TAP_OUT_VOLUME
+                        )
+                        VALUES (%s, %s, %s, %s, %s, %s)
+                    """, (
+                        row["TRAIN_LINE"],
+                        row["STATION_CODE"],
+                        row["STATION_NAME"],
+                        row["DATE"],
+                        row["TOTAL_TAP_IN_VOLUME"],
+                        row["TOTAL_TAP_OUT_VOLUME"]
+                    ))
+                    conn.commit()
+                    st.success("✅ Data inserted into database!")
+            except mysql.connector.Error as err:
+                st.error(f"MySQL error: {err}")
+                print(f"MySQL error: {err}")  # log to console
+            
+
