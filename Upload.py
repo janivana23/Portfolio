@@ -28,10 +28,6 @@ def app():
     uploaded_file = st.file_uploader("Choose CSV", type="csv")
     if uploaded_file is not None:
         df = pd.read_csv(uploaded_file)
-        st.write("Preview of current database in TRAIN VOLUME:")
-        rows_qty = len(df)
-        st.write(f"Total rows currently: {rows_qty}")
-        st.dataframe(df.head(10))
 
                 # Normalize column names
         df.columns = df.columns.str.strip().str.upper().str.replace(" ", "_")
@@ -55,6 +51,13 @@ def app():
             df_expanded[col] = df_expanded[col].fillna(0).astype(int)
 
         df_expanded["YEAR_MONTH"] = pd.to_datetime(df_expanded["YEAR_MONTH"], errors="coerce")
+
+        st.write("Preview of current database in TRAIN VOLUME:")
+        query = "SELECT * FROM TRAIN_VOLUME"
+        cur.execute(query)
+        rows_qty = cur.fetchall()
+        st.write(f"Total rows currently: {len(rows_qty)}")
+        st.dataframe(rows_qty)
 
         rows_qty = len(df_expanded)
         st.write("Preview after splitting multi-line train codes:")
