@@ -50,7 +50,7 @@ def app():
     # --- Stations Opened per Year ---
     st.subheader("Stations Opened per Year")
 
-    stations_per_year = df.groupby(df['train_start_operation']).size()
+    stations_per_year = df.groupby(df['train_start_operation'].dt.year).size()
 
     fig, ax = plt.subplots()
     stations_per_year.plot(kind="bar", ax=ax)
