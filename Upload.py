@@ -28,10 +28,13 @@ def app():
     uploaded_file = st.file_uploader("Choose CSV", type="csv")
     if uploaded_file is not None:
         df = pd.read_csv(uploaded_file)
+        st.write("Preview of current database in TRAIN VOLUME:")
+        rows_qty = len(df)
+        st.write(f"Total rows currently: {rows_qty}")
+        st.dataframe(df.head(10))
+
                 # Normalize column names
         df.columns = df.columns.str.strip().str.upper().str.replace(" ", "_")
-        st.write("Preview of uploaded CSV:")
-        st.dataframe(df.head())
 
         # Split multi-line train codes into separate rows
         new_rows = []
@@ -56,8 +59,6 @@ def app():
         rows_qty = len(df_expanded)
         st.write("Preview after splitting multi-line train codes:")
         st.write(f"Total rows after splitting: {rows_qty}")
-        st.write("Data types after conversion:")
-        st.write(df_expanded.dtypes)
 
         st.dataframe(df_expanded.head())
 
