@@ -23,9 +23,7 @@ def app():
         ssl_ca=DB_CA
     )
 
-    cur = conn.cursor()
-    st.title("Upload CSV to Oracle")
-    
+    cur = conn.cursor()    
 
     uploaded_file = st.file_uploader("Choose CSV", type="csv")
     if uploaded_file is not None:
