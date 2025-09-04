@@ -2,9 +2,10 @@ import streamlit as st
 import mysql.connector
 import pandas as pd
 
-st.title("Upload CSV to Oracle")
 
 def app():
+    st.title("Upload CSV to Oracle")
+
     # -------------------- Database Connection --------------------
     DB_USER = st.secrets["mysql"]["user"]
     DB_PASSWORD = st.secrets["mysql"]["password"]

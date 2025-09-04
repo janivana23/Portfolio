@@ -4,8 +4,6 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import mysql.connector
 
-st.title("🚇 MRT Station Map")
-
 
 def app():
     # -------------------- Database Connection --------------------
