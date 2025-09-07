@@ -110,7 +110,7 @@ def app():
     fig, ax = plt.subplots()
     ax.scatter(station_vol["train_volume_tap_in"], station_vol["train_volume_tap_out"])
 
-    for station, row in station_vol.iterrows():
+    for station, row in top10.iterrows():
         ax.annotate(station, (row["train_volume_tap_in"], row["train_volume_tap_out"]), fontsize=6)
 
     ax.set_xlabel("Tap-in Volume")
