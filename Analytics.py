@@ -3,6 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 import mysql.connector
+from adjustText import adjust_text
 
 
 def app():
@@ -114,12 +115,21 @@ def app():
     fig, ax = plt.subplots()
     ax.scatter(station_vol["train_volume_tap_in"], station_vol["train_volume_tap_out"])
 
+    texts = []
     for station, row in top10.iterrows():
-        ax.annotate(station, (row["train_volume_tap_in"], row["train_volume_tap_out"]), 
-                    xytext=(5, 5),  # offset in pixels
-                    textcoords="offset points",
-                    rotation=30,
-                    fontsize=6)
+        texts.append(
+            ax.text(row["train_volume_tap_in"], row["train_volume_tap_out"], station, fontsize=6)
+        )
+
+    # increase expand_text and force_text to push labels further
+    adjust_text(
+        texts, 
+        ax=ax,
+        expand_text=(1.2, 1.4),   # push labels further from each other
+        expand_points=(1.2, 1.4), 
+        force_text=(0.5, 1.0),    # stronger repulsion between labels
+        arrowprops=dict(arrowstyle="->", color="gray", lw=0.5)
+    )
 
     ax.set_xlabel("Tap-in Volume")
     ax.set_ylabel("Tap-out Volume")
