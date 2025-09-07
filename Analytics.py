@@ -106,6 +106,10 @@ def app():
     st.subheader("Tap-in vs Tap-out by Station")
 
     station_vol = df.groupby("train_name")[["train_volume_tap_in", "train_volume_tap_out"]].sum()
+    station_vol["total_volume"] = station_vol["train_volume_tap_in"] + station_vol["train_volume_tap_out"]
+
+    # Take top 10 stations
+    top10 = station_vol.sort_values("total_volume", ascending=False).head(10)
 
     fig, ax = plt.subplots()
     ax.scatter(station_vol["train_volume_tap_in"], station_vol["train_volume_tap_out"])
