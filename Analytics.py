@@ -118,6 +118,7 @@ def app():
         ax.annotate(station, (row["train_volume_tap_in"], row["train_volume_tap_out"]), 
                     xytext=(5, 5),  # offset in pixels
                     textcoords="offset points",
+                    rotation=30,
                     fontsize=6)
 
     ax.set_xlabel("Tap-in Volume")
