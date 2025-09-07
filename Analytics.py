@@ -115,7 +115,10 @@ def app():
     ax.scatter(station_vol["train_volume_tap_in"], station_vol["train_volume_tap_out"])
 
     for station, row in top10.iterrows():
-        ax.annotate(station, (row["train_volume_tap_in"], row["train_volume_tap_out"]), fontsize=6)
+        ax.annotate(station, (row["train_volume_tap_in"], row["train_volume_tap_out"]), 
+                    xytext=(5, 5),  # offset in pixels
+                    textcoords="offset points",
+                    fontsize=6)
 
     ax.set_xlabel("Tap-in Volume")
     ax.set_ylabel("Tap-out Volume")
