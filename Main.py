@@ -12,6 +12,7 @@ import Map
 import Analytics
 import Download
 import Upload
+import Modelling
 
 # -------------------- Database Connection --------------------
 DB_USER = st.secrets["mysql"]["user"]
@@ -141,7 +142,7 @@ with st.sidebar.expander("🔒 Account"):
 # Always visible main pages
 page = st.sidebar.radio(
     "Go to",
-    ["Data", "Map", "Analytics", "Download", "Upload"]
+    ["Data", "Map", "Analytics", "Modelling", "Download", "Upload"]
 )
 
 # ---------------- Routing ----------------
@@ -225,6 +226,8 @@ else:
         Data.app() 
     elif page == "Analytics":
         Analytics.app()
+    elif page == "Analytics":
+        Modelling.app()
     elif page == "Map":
         Map.app()
     elif page == "Upload":

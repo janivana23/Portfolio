@@ -42,8 +42,12 @@ def app():
     
 
     #-----------------------------------------------------------------------------------------
-    query1 = "SELECT * FROM TRAIN_STATION NATURAL JOIN TRAIN NATURAL JOIN URA"
-    listdtype = [("train_station_lat", "float"), ("train_station_long", "float"), ("train_start_operation", "datetime")]
-    df = run_query(query1, listdtype)
+    query = "SELECT * FROM TRAIN_VOLUME;"  # adjust columns as needed
+    df = pd.read_sql(query, conn)
+    conn.close()
+
+    print(df.head())
+    listdtype = [("train_volume_tap_in", "int"), ("train_volume_tap_out", "int")]
+    df = run_query(query, listdtype)
 
     st.title("🚇 Singapore Train Station Modelling Analytics")
