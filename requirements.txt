@@ -9,7 +9,3 @@ mysql-connector-python
 EmailMessage
 bcrypt
 adjustText
-scikit-learn
-numpy
-statsmodels
-pmdarima

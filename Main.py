@@ -226,8 +226,8 @@ else:
         Data.app() 
     elif page == "Analytics":
         Analytics.app()
-    elif page == "Analytics":
-        Modelling.app()
+    # elif page == "Modelling":
+    #     Modelling.app()
     elif page == "Map":
         Map.app()
     elif page == "Upload":
