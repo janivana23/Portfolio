@@ -9,3 +9,8 @@ mysql-connector-python
 EmailMessage
 bcrypt
 adjustText
+ARIMA
+numpy
+LinearRegression
+mean_squared_error
+r2_score
