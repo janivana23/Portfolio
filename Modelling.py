@@ -58,6 +58,9 @@ def app():
     # Make sure that year month is datetime
     df["train_volume_year_month"] = pd.to_datetime(df["train_volume_year_month"])
     df = df.sort_values("train_volume_year_month")
+    # Encode day type (Weekday/Weekend)
+    df["train_volume_day"] = df["train_volume_day"].map({"WEEKDAY": 0, "WEEKENDS/HOLIDAY": 1})
+
 
     #Split data to train and test
     train = df[df["train_volume_year_month"].dt.month == 9]   # September 2023
