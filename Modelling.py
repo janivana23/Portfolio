@@ -66,6 +66,10 @@ def app():
     train = df[df["train_volume_year_month"].dt.month == 9]   # September 2023
     test  = df[df["train_volume_year_month"].dt.month == 10]  # October 2023
 
+    st.write(train.head())
+    st.write(test.head())
+
+
     # Create x and y train test
     y_train = train["train_volume_tap_in"]
     y_test  = test["train_volume_tap_in"]
