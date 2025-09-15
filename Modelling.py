@@ -98,11 +98,20 @@ def app():
     st.write(f"R²: {r2:.2f}")
 
     # -------------------- Visualization --------------------
+    # Aggregate by hour
+    hourly_test = test_clean.groupby("train_volume_hour")["train_volume_tap_in"].sum()
+    hourly_pred = pd.Series(y_pred, index=test_clean["train_volume_hour"]).groupby(level=0).sum()
+
     plt.figure(figsize=(10,5))
-    plt.plot(test_clean["train_volume_year_month"], y_test, label="Actual", color="black")
-    plt.plot(test_clean["train_volume_year_month"], y_pred, label="Predicted", color="red")
+    plt.plot(hourly_test.index, hourly_test.values, label="Actual", marker='o', linestyle='-', color='black')
+    plt.plot(hourly_pred.index, hourly_pred.values, label="Predicted", marker='x', linestyle='--', color='red')
+    plt.xlabel("Hour of Day")
+    plt.ylabel("Tap-In Volume")
+    plt.title("🚇 Hourly Tap-In Forecast (Random Forest)")
+    plt.xticks(range(0,24))
+    plt.grid(True, linestyle='--', alpha=0.5)
     plt.legend()
-    plt.title("Random Forest Forecast: Tap-In Volume")
+    plt.tight_layout()
     st.pyplot(plt)
 
 
@@ -141,22 +150,6 @@ def app():
     plt.title("🚇 Hourly Tap-In Forecast (Gradient Boosting)")
     plt.xticks(range(0,24))
     plt.grid(True, linestyle='--', alpha=0.5)
-    plt.legend()
-    plt.tight_layout()
-    st.pyplot(plt)
-
-    # Aggregate by station
-    station_test = test_clean.groupby("train_code")["train_volume_tap_in"].sum()
-    station_pred = pd.Series(y_pred, index=test_clean["train_code"]).groupby(level=0).sum()
-
-    plt.figure(figsize=(12,5))
-    plt.bar(station_test.index, station_test.values, label="Actual", alpha=0.7, color='black')
-    plt.bar(station_pred.index, station_pred.values, label="Predicted", alpha=0.5, color='red')
-    plt.xlabel("Train Station")
-    plt.ylabel("Total Tap-In Volume")
-    plt.title("🚇 Station-Level Tap-In Forecast (Gradient Boosting)")
-    plt.xticks(rotation=45)
-    plt.grid(axis='y', linestyle='--', alpha=0.5)
     plt.legend()
     plt.tight_layout()
     st.pyplot(plt)
