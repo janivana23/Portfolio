@@ -7,8 +7,6 @@ from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 import numpy as np
 
-from statsmodels.tsa.arima.model import ARIMA
-
 import matplotlib.pyplot as plt
 
 def app():
@@ -80,10 +78,6 @@ def app():
     X_train = train[["train_volume_day"]]
     X_test  = test[["train_volume_day"]]
 
-    st.write("X_train NaNs:", X_train.isna().sum())
-    st.write("y_train NaNs:", y_train.isna().sum())
-    st.write(df["train_volume_day"].unique())
-
     train_clean = train.dropna(subset=["train_volume_day", "train_volume_tap_in"])
     X_train = train_clean[["train_volume_day"]]
     y_train = train_clean["train_volume_tap_in"]
@@ -94,13 +88,18 @@ def app():
     y_pred = model.predict(X_test)
 
     st.write("MSE:", mean_squared_error(y_test, y_pred))
+    st.write("MAE:", mean_absolute_error(y_test, y_pred))
     st.write("R²:", r2_score(y_test, y_pred))
 
-    # # --- 5. Visualization ---
-    # plt.figure(figsize=(10,5))
-    # plt.plot(daily_train.index, daily_train, label="Train (Sept)")
-    # plt.plot(daily_test.index, daily_test, label="Actual (Oct)", color="black")
-    # plt.plot(forecast.index, forecast, label="Forecast (Oct)", color="red")
-    # plt.legend()
-    # plt.title("Forecast: Tap-In Volume")
-    # plt.show()
+    # Visualisation
+    plt.figure(figsize=(12,6))
+    plt.plot(train_clean["train_volume_year_month"], y_train, label="Train", marker='o')
+    plt.plot(test["train_volume_year_month"], y_test, label="Actual Test", marker='o', color="black")
+    plt.plot(test["train_volume_year_month"], y_pred, label="Predicted Test", marker='x', color="red")
+    plt.xlabel("Date")
+    plt.ylabel("Tap-In Volume")
+    plt.title("Train Tap-In Volume Prediction")
+    plt.legend()
+    plt.xticks(rotation=45)
+    plt.tight_layout()
+    st.pyplot(plt)
