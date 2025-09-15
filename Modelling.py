@@ -77,6 +77,8 @@ def app():
     y_train = train["train_volume_tap_in"]
     y_test  = test["train_volume_tap_in"]
 
+    X_train = train[["train_volume_day"]]
+    X_test  = test[["train_volume_day"]]
 
     st.write("X_train NaNs:", X_train.isna().sum())
     st.write("y_train NaNs:", y_train.isna().sum())
@@ -85,9 +87,6 @@ def app():
     train_clean = train.dropna(subset=["train_volume_day", "train_volume_tap_in"])
     X_train = train_clean[["train_volume_day"]]
     y_train = train_clean["train_volume_tap_in"]
-
-    X_train = train[["train_volume_day"]]
-    X_test  = test[["train_volume_day"]]
 
     # Regression Model
     model = LinearRegression()
