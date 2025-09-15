@@ -64,8 +64,8 @@ def app():
     test  = df[df["train_volume_year_month"].dt.month == 10]  # October 2023
 
     # Create x and y train test
-    y_train = train["TOTAL_TAP_IN_VOLUME"]
-    y_test  = test["TOTAL_TAP_IN_VOLUME"]
+    y_train = train["train_volume_tap_in"]
+    y_test  = test["train_volume_tap_in"]
 
     X_train = train[["train_volume_day"]]
     X_test  = test[["train_volume_day"]]
@@ -80,8 +80,8 @@ def app():
 
     
     # Aggregate daily volume
-    daily_train = train.set_index("DATE")["TOTAL_TAP_IN_VOLUME"]
-    daily_test  = test.set_index("DATE")["TOTAL_TAP_IN_VOLUME"]
+    daily_train = train.set_index("DATE")["train_volume_tap_in"]
+    daily_test  = test.set_index("DATE")["train_volume_tap_in"]
 
     # --- 2. Fit ARIMA model ---
     model = ARIMA(daily_train, order=(1,1,1), seasonal_order=(1,1,1,7))     
