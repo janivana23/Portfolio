@@ -70,6 +70,8 @@ def app():
         if st.button("Insert into TRAIN_VOLUME"):
 
             try:
+                st.write("Please give a few minutes if it is a large dataset")
+                st.write("Loading...")
                 for _, row in df_expanded.iterrows():
                     cur.execute("""
                         INSERT INTO TRAIN_VOLUME (
