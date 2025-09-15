@@ -96,8 +96,8 @@ def app():
 
     
     # Aggregate daily volume
-    daily_train = train.set_index("DATE")["train_volume_tap_in"]
-    daily_test  = test.set_index("DATE")["train_volume_tap_in"]
+    daily_train = train.set_index("train_volume_day")["train_volume_tap_in"]
+    daily_test  = test.set_index("train_volume_day")["train_volume_tap_in"]
 
     # --- 2. Fit ARIMA model ---
     model = ARIMA(daily_train, order=(1,1,1), seasonal_order=(1,1,1,7))     
