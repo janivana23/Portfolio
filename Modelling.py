@@ -80,10 +80,6 @@ def app():
     X_train = train[["train_volume_day"]]
     X_test  = test[["train_volume_day"]]
 
-    st.write("X_train shape:", X_train.shape, "dtype:", X_train.dtypes)
-    st.write("y_train shape:", y_train.shape, "dtype:", y_train.dtype)
-
-
     # Regression Model
     model = LinearRegression()
     model.fit(X_train, y_train)
@@ -104,18 +100,26 @@ def app():
     # --- 3. Forecast October ---
     forecast = model_fit.forecast(steps=len(daily_test))
     forecast = pd.Series(forecast, index=daily_test.index)
-
-    # Align indexes
+    
+    # Align on index and drop NaN/mismatches
     y_true, y_pred = daily_test.align(forecast, join="inner")
 
-    # Drop NaN
-    y_true = y_true.dropna()
-    y_pred = y_pred.dropna()
+    # Ensure equal length
+    if len(y_true) == 0 or len(y_pred) == 0:
+        st.error("⚠️ No overlapping dates between actuals and forecast.")
+    else:
+        # Trim to min length just in case
+        min_len = min(len(y_true), len(y_pred))
+        y_true = y_true.iloc[:min_len]
+        y_pred = y_pred.iloc[:min_len]
 
-    # --- 4. Evaluate ---
-    mse = mean_squared_error(y_true, y_pred)
-    mae = mean_absolute_error(y_true, y_pred)
-    rmse = np.sqrt(mse)
+        mse = mean_squared_error(y_true, y_pred)
+        mae = mean_absolute_error(y_true, y_pred)
+        rmse = np.sqrt(mse)
+
+        st.write(f"MSE: {mse:.2f}")
+        st.write(f"MAE: {mae:.2f}")
+        st.write(f"RMSE: {rmse:.2f}")
 
     print(f"MSE: {mse:.2f}")
     print(f"MAE: {mae:.2f}")
