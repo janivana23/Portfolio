@@ -29,7 +29,7 @@ def app():
     if uploaded_file is not None:
         df = pd.read_csv(uploaded_file)
 
-                # Normalize column names
+        # Normalize column names
         df.columns = df.columns.str.strip().str.upper().str.replace(" ", "_")
 
         # Split multi-line train codes into separate rows
@@ -73,19 +73,21 @@ def app():
                 for _, row in df_expanded.iterrows():
                     cur.execute("""
                         INSERT INTO TRAIN_VOLUME (
-                            TRAIN_LINE,
-                            STATION_CODE,
-                            STATION_NAME,
-                            DATE,
-                            TOTAL_TAP_IN_VOLUME,
-                            TOTAL_TAP_OUT_VOLUME
+                            TRAIN_VOLUME_YEAR_MONTH,
+                            TRAIN_VOLUME_DAY,
+                            TRAIN_VOLUME_HOUR,
+                            TRAIN_CODE,
+                            TRAIN_VOLUME_TAP_IN,
+                            TRAIN_VOLUME_TAP_OUT
                         )
+                            
+                                
                         VALUES (%s, %s, %s, %s, %s, %s)
                     """, (
-                        row["TRAIN_LINE"],
-                        row["STATION_CODE"],
-                        row["STATION_NAME"],
-                        row["DATE"],
+                        row["YEAR_MONTH"],
+                        row["DAY_TYPE"],
+                        row["TIME_PER_HOUR"],
+                        row["PT_CODE"],
                         row["TOTAL_TAP_IN_VOLUME"],
                         row["TOTAL_TAP_OUT_VOLUME"]
                     ))
