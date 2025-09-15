@@ -1,12 +1,9 @@
 import streamlit as st
 import pandas as pd
-
 import mysql.connector
-
-from sklearn.linear_model import LinearRegression
+from sklearn.ensemble import GradientBoostingRegressor
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 import numpy as np
-
 import matplotlib.pyplot as plt
 
 def app():
@@ -26,80 +23,79 @@ def app():
         port=DB_PORT,
         ssl_ca=DB_CA
     )
-    
+
     @st.cache_data
     def run_query(query, listdtype):
         cur = conn.cursor()
         cur.execute(query)
-        cols = [col[0] for col in cur.description]  # column names
+        cols = [col[0] for col in cur.description]
         rows = cur.fetchall()
         df = pd.DataFrame(rows, columns=cols)
         df.columns = df.columns.str.lower()
-        # Ensure coordinates are float
         for col, dtype in listdtype:
-            if dtype == "float" or dtype == "int":
+            if dtype in ["float", "int"]:
                 df[col] = pd.to_numeric(df[col], errors="coerce")
             elif dtype == "datetime":
                 df[col] = pd.to_datetime(df[col], errors="coerce")
-
         return df
-    
 
-    #-----------------------------------------------------------------------------------------
-    query = "SELECT * FROM TRAIN_VOLUME;" 
+    # -------------------- Load Data --------------------
+    query = "SELECT * FROM TRAIN_VOLUME;"
     listdtype = [("train_volume_tap_in", "int"), ("train_volume_tap_out", "int")]
     df = run_query(query, listdtype)
-
+    
     st.title("🚇 Singapore Train Station Modelling Analytics")
 
-    # Make sure that year month is datetime
+    # -------------------- Preprocess --------------------
     df["train_volume_year_month"] = pd.to_datetime(df["train_volume_year_month"])
-    # Encode day type (Weekday/Weekend)
+    df["day_of_week"] = df["train_volume_year_month"].dt.dayofweek  # 0=Mon,6=Sun
     df["train_volume_day"] = df["train_volume_day"].map({"WEEKDAY": 0, "WEEKENDS/HOLIDAY": 1})
+    
+    # Drop rows with missing values in important columns
+    df = df.dropna(subset=["train_volume_tap_in", "train_volume_day", "train_code"])
 
-    #Split data to train and test
-    # Convert to "period month" so year+month are grouped properly
+    # One-hot encode train_code
+    df = pd.get_dummies(df, columns=["train_code"], drop_first=True)
+
+    # Split train/test by month
     months = df["train_volume_year_month"].dt.to_period("M").unique()
-
-    if len(months) >= 2:
-        train_month = months[-2]  # second last month
-        test_month  = months[-1]  # last month
-
-        train = df[df["train_volume_year_month"].dt.to_period("M") == train_month]
-        test  = df[df["train_volume_year_month"].dt.to_period("M") == test_month]
-    else:
+    if len(months) < 2:
         st.error("❌ Not enough months of data to split into train/test")
-        train, test = pd.DataFrame(), pd.DataFrame()
+        return
 
-    # Create x and y train test
+    train_month = months[-2]
+    test_month = months[-1]
+
+    train = df[df["train_volume_year_month"].dt.to_period("M") == train_month]
+    test = df[df["train_volume_year_month"].dt.to_period("M") == test_month]
+
+    # -------------------- Features/Target --------------------
+    feature_cols = [c for c in train.columns if c not in ["train_volume_tap_in", "train_volume_tap_out", "train_volume_year_month"]]
+    X_train = train[feature_cols]
     y_train = train["train_volume_tap_in"]
-    y_test  = test["train_volume_tap_in"]
+    X_test = test[feature_cols]
+    y_test = test["train_volume_tap_in"]
 
-    X_train = train[["train_volume_day"]]
-    X_test  = test[["train_volume_day"]]
-
-    train_clean = train.dropna(subset=["train_volume_day", "train_volume_tap_in"])
-    X_train = train_clean[["train_volume_day"]]
-    y_train = train_clean["train_volume_tap_in"]
-
-    # Regression Model
-    model = LinearRegression()
+    # -------------------- Model --------------------
+    model = GradientBoostingRegressor(n_estimators=500, learning_rate=0.05, max_depth=3, random_state=42)
     model.fit(X_train, y_train)
     y_pred = model.predict(X_test)
 
-    st.write("MSE:", mean_squared_error(y_test, y_pred))
-    st.write("MAE:", mean_absolute_error(y_test, y_pred))
-    st.write("R²:", r2_score(y_test, y_pred))
+    # -------------------- Metrics --------------------
+    mse = mean_squared_error(y_test, y_pred)
+    mae = mean_absolute_error(y_test, y_pred)
+    r2 = r2_score(y_test, y_pred)
 
-    # Visualisation
-    plt.figure(figsize=(12,6))
-    plt.plot(train_clean["train_volume_year_month"], y_train, label="Train", marker='o')
-    plt.plot(test["train_volume_year_month"], y_test, label="Actual Test", marker='o', color="black")
-    plt.plot(test["train_volume_year_month"], y_pred, label="Predicted Test", marker='x', color="red")
+    st.write(f"MSE: {mse:.2f}")
+    st.write(f"MAE: {mae:.2f}")
+    st.write(f"R²: {r2:.2f}")
+
+    # -------------------- Visualization --------------------
+    plt.figure(figsize=(12,5))
+    plt.plot(test["train_volume_year_month"], y_test, label="Actual", marker='o')
+    plt.plot(test["train_volume_year_month"], y_pred, label="Predicted", marker='x')
     plt.xlabel("Date")
     plt.ylabel("Tap-In Volume")
-    plt.title("Train Tap-In Volume Prediction")
+    plt.title("Actual vs Predicted Tap-In Volume")
     plt.legend()
-    plt.xticks(rotation=45)
-    plt.tight_layout()
     st.pyplot(plt)
