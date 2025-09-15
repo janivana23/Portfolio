@@ -48,7 +48,7 @@ def app():
     
 
     #-----------------------------------------------------------------------------------------
-    query = "SELECT * FROM TRAIN_VOLUME;"  # adjust columns as needed
+    query = "SELECT * FROM TRAIN_VOLUME;" 
     listdtype = [("train_volume_tap_in", "int"), ("train_volume_tap_out", "int")]
     df = run_query(query, listdtype)
 
@@ -65,8 +65,20 @@ def app():
 
 
     #Split data to train and test
-    train = df[df["train_volume_year_month"].dt.month == 9]   # September 2023
-    test  = df[df["train_volume_year_month"].dt.month == 10]  # October 2023
+    # Convert to "period month" so year+month are grouped properly
+    months = df["train_volume_year_month"].dt.to_period("M").unique()
+
+    if len(months) >= 2:
+        train_month = months[-2]  # second last month
+        test_month  = months[-1]  # last month
+
+        train = df[df["train_volume_year_month"].dt.to_period("M") == train_month]
+        test  = df[df["train_volume_year_month"].dt.to_period("M") == test_month]
+
+        st.write(f"📅 Training month: {train_month}, Testing month: {test_month}")
+    else:
+        st.error("❌ Not enough months of data to split into train/test")
+        train, test = pd.DataFrame(), pd.DataFrame()
 
     st.dataframe(train.head())
     st.dataframe(test.head())
