@@ -88,23 +88,21 @@ def app():
     X_train = train_clean[["train_volume_day"]]
     y_train = train_clean["train_volume_tap_in"]
 
-    # # Regression Model
-    # model = LinearRegression()
-    # model.fit(X_train, y_train)
-    # y_pred = model.predict(X_test)
+    # Regression Model
+    model = LinearRegression()
+    model.fit(X_train, y_train)
+    y_pred = model.predict(X_test)
 
-    # print("MSE:", mean_squared_error(y_test, y_pred))
-    # print("R²:", r2_score(y_test, y_pred))
+    print("MSE:", mean_squared_error(y_test, y_pred))
+    print("R²:", r2_score(y_test, y_pred))
 
     
     daily_train = train.set_index("train_volume_year_month")["train_volume_tap_in"].resample("D").sum()
     daily_test  = test.set_index("train_volume_year_month")["train_volume_tap_in"].resample("D").sum()
 
-    model = ARIMA(daily_train, order=(1,1,1), seasonal_order=(1,1,1,7))
-    model_fit = model.fit()
 
     # --- 3. Forecast October ---
-    forecast = model_fit.forecast(steps=len(daily_test))
+    forecast = model.fit(X_train, y_train).forecast(steps=len(daily_test))
     forecast = pd.Series(forecast, index=daily_test.index) 
 
     # Align on index
