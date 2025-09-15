@@ -59,7 +59,7 @@ def app():
     df["train_volume_year_month"] = pd.to_datetime(df["train_volume_year_month"])
     df = df.sort_values("train_volume_year_month")
     # Encode day type (Weekday/Weekend)
-    df["train_volume_day"] = df["train_volume_day"].map({"WEEKDAY": 0, "WEEKENDS/HOLIDAY": 1})
+    df["train_volume_day"] = df["train_volume_day"].map({"weekday": 0, "weekends/holiday": 1})
 
 
     #Split data to train and test
@@ -72,6 +72,10 @@ def app():
 
     X_train = train[["train_volume_day"]]
     X_test  = test[["train_volume_day"]]
+
+    st.write("X_train shape:", X_train.shape, "dtype:", X_train.dtypes)
+    st.write("y_train shape:", y_train.shape, "dtype:", y_train.dtype)
+
 
     # Regression Model
     model = LinearRegression()
