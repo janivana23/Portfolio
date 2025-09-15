@@ -3,6 +3,8 @@ import pandas as pd
 import mysql.connector
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.preprocessing import OneHotEncoder
+from sklearn.ensemble import GradientBoostingRegressor
+
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 import numpy as np
 import matplotlib.pyplot as plt
@@ -81,6 +83,7 @@ def app():
     y_test  = test_clean[target].values
 
     # -------------------- Random Forest Model --------------------
+    st.subheader("Regression Model: Random Forest")
     model = RandomForestRegressor(n_estimators=200, random_state=42)
     model.fit(X_train, y_train)
     y_pred = model.predict(X_test)
@@ -95,9 +98,44 @@ def app():
     st.write(f"R²: {r2:.2f}")
 
     # -------------------- Visualization --------------------
+    st.write("Visual Plot for Random Forest")
     plt.figure(figsize=(10,5))
     plt.plot(test_clean["train_volume_year_month"], y_test, label="Actual", color="black")
     plt.plot(test_clean["train_volume_year_month"], y_pred, label="Predicted", color="red")
     plt.legend()
     plt.title("Random Forest Forecast: Tap-In Volume")
+    st.pyplot(plt)
+
+
+#-----------------------------------------------------------------------------------------
+
+# -------------------- Gradient Boosting Model --------------------
+    st.subheader("Regression Model: Random Forest")
+
+    model = GradientBoostingRegressor(
+        n_estimators=300, 
+        learning_rate=0.1, 
+        max_depth=5, 
+        random_state=42
+    )
+    model.fit(X_train, y_train)
+    y_pred = model.predict(X_test)
+
+    # -------------------- Evaluation --------------------
+    mse = mean_squared_error(y_test, y_pred)
+    mae = mean_absolute_error(y_test, y_pred)
+    r2  = r2_score(y_test, y_pred)
+
+    st.write(f"MSE: {mse:.2f}")
+    st.write(f"MAE: {mae:.2f}")
+    st.write(f"R²: {r2:.2f}")
+
+    # -------------------- Visualization --------------------
+    st.write("Visual Plot for Gradient Boost")
+
+    plt.figure(figsize=(10,5))
+    plt.plot(test_clean["train_volume_year_month"], y_test, label="Actual", color="black")
+    plt.plot(test_clean["train_volume_year_month"], y_pred, label="Predicted", color="red")
+    plt.legend()
+    plt.title("Gradient Boosting Forecast: Tap-In Volume")
     st.pyplot(plt)
