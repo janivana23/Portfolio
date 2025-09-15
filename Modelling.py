@@ -77,6 +77,15 @@ def app():
     y_train = train["train_volume_tap_in"]
     y_test  = test["train_volume_tap_in"]
 
+
+    st.write("X_train NaNs:", X_train.isna().sum())
+    st.write("y_train NaNs:", y_train.isna().sum())
+    st.write(df["train_volume_day"].unique())
+
+    train_clean = train.dropna(subset=["train_volume_day", "train_volume_tap_in"])
+    X_train = train_clean[["train_volume_day"]]
+    y_train = train_clean["train_volume_tap_in"]
+
     X_train = train[["train_volume_day"]]
     X_test  = test[["train_volume_day"]]
 
@@ -94,7 +103,7 @@ def app():
 
     model = ARIMA(daily_train, order=(1,1,1), seasonal_order=(1,1,1,7))
     model_fit = model.fit()
-    
+
     # --- 3. Forecast October ---
     forecast = model_fit.forecast(steps=len(daily_test))
     forecast = pd.Series(forecast, index=daily_test.index) 
