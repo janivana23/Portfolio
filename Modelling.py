@@ -61,6 +61,8 @@ def app():
     df["train_volume_day"] = df["train_volume_day"].map({"weekday": 0, "weekends/holiday": 1})
 
     st.write( "dtype:", df.dtypes)
+    st.write(df.head())
+
 
     #Split data to train and test
     train = df[df["train_volume_year_month"].dt.month == 9]   # September 2023
