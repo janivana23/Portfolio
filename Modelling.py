@@ -98,7 +98,6 @@ def app():
     st.write(f"R²: {r2:.2f}")
 
     # -------------------- Visualization --------------------
-    st.write("Visual Plot for Random Forest")
     plt.figure(figsize=(10,5))
     plt.plot(test_clean["train_volume_year_month"], y_test, label="Actual", color="black")
     plt.plot(test_clean["train_volume_year_month"], y_pred, label="Predicted", color="red")
@@ -130,11 +129,27 @@ def app():
     st.write(f"R²: {r2:.2f}")
 
     # -------------------- Visualization --------------------
-    st.write("Visual Plot for Gradient Boost")
+    plt.figure(figsize=(12,6))
 
-    plt.figure(figsize=(10,5))
-    plt.plot(test_clean["train_volume_year_month"], y_test, label="Actual", color="black")
-    plt.plot(test_clean["train_volume_year_month"], y_pred, label="Predicted", color="red")
+    # Plot actual tap-in volumes
+    plt.plot(test_clean["train_volume_year_month"], y_test, 
+            label="Actual", color="black", marker='o', linestyle='-', alpha=0.7)
+
+    # Plot predicted tap-in volumes
+    plt.plot(test_clean["train_volume_year_month"], y_pred, 
+            label="Predicted", color="red", marker='x', linestyle='--', alpha=0.8)
+
+    # Optional: add rolling average for smoother trend (7-day window)
+    rolling_actual = pd.Series(y_test, index=test_clean["train_volume_year_month"]).rolling(window=7).mean()
+    rolling_pred   = pd.Series(y_pred, index=test_clean["train_volume_year_month"]).rolling(window=7).mean()
+    plt.plot(rolling_actual.index, rolling_actual, label="Actual (7-day avg)", color="blue", linewidth=2, alpha=0.6)
+    plt.plot(rolling_pred.index, rolling_pred, label="Predicted (7-day avg)", color="orange", linewidth=2, alpha=0.6)
+
+    plt.xlabel("Date")
+    plt.ylabel("Tap-In Volume")
+    plt.title("🚇 Gradient Boosting Forecast: Tap-In Volume")
+    plt.xticks(rotation=45)
+    plt.grid(True, linestyle='--', alpha=0.5)
     plt.legend()
-    plt.title("Gradient Boosting Forecast: Tap-In Volume")
+    plt.tight_layout()
     st.pyplot(plt)
