@@ -54,18 +54,10 @@ def app():
 
     st.title("🚇 Singapore Train Station Modelling Analytics")
 
-    st.write("Number of rows fetched:", len(df))
-    if df.empty:
-        st.warning("❌ The query returned 0 rows. Check your database table or query.")
-
     # Make sure that year month is datetime
     df["train_volume_year_month"] = pd.to_datetime(df["train_volume_year_month"])
     # Encode day type (Weekday/Weekend)
-    df["train_volume_day"] = df["train_volume_day"].map({"weekday": 0, "weekends/holiday": 1})
-
-    st.write( "dtype:", df.dtypes)
-    st.dataframe(df.head())
-
+    df["train_volume_day"] = df["train_volume_day"].map({"WEEKDAY": 0, "WEEKENDS/HOLIDAY": 1})
 
     #Split data to train and test
     # Convert to "period month" so year+month are grouped properly
@@ -82,10 +74,6 @@ def app():
     else:
         st.error("❌ Not enough months of data to split into train/test")
         train, test = pd.DataFrame(), pd.DataFrame()
-
-    st.dataframe(train.head())
-    st.dataframe(test.head())
-
 
     # Create x and y train test
     y_train = train["train_volume_tap_in"]
