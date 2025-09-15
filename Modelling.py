@@ -110,8 +110,7 @@ def app():
 #-----------------------------------------------------------------------------------------
 
 # -------------------- Gradient Boosting Model --------------------
-    st.subheader("Regression Model: Random Forest")
-
+    st.subheader("Regression Model: Gradient Boosting")
     model = GradientBoostingRegressor(
         n_estimators=300, 
         learning_rate=0.1, 
