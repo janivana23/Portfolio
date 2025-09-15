@@ -54,6 +54,9 @@ def app():
 
     st.title("🚇 Singapore Train Station Modelling Analytics")
 
+    st.write("Number of rows fetched:", len(df))
+    if df.empty:
+        st.warning("❌ The query returned 0 rows. Check your database table or query.")
 
     # Make sure that year month is datetime
     df["train_volume_year_month"] = pd.to_datetime(df["train_volume_year_month"])
