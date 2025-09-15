@@ -89,17 +89,15 @@ def app():
     print("R²:", r2_score(y_test, y_pred))
 
     
-    # Aggregate daily volume
-    daily_train = train.set_index("train_volume_day")["train_volume_tap_in"]
-    daily_test  = test.set_index("train_volume_day")["train_volume_tap_in"]
+    daily_train = train.set_index("train_volume_year_month")["train_volume_tap_in"].resample("D").sum()
+    daily_test  = test.set_index("train_volume_year_month")["train_volume_tap_in"].resample("D").sum()
 
-    # --- 2. Fit ARIMA model ---
-    model = ARIMA(daily_train, order=(1,1,1), seasonal_order=(1,1,1,7))     
+    model = ARIMA(daily_train, order=(1,1,1), seasonal_order=(1,1,1,7))
     model_fit = model.fit()
-
+    
     # --- 3. Forecast October ---
     forecast = model_fit.forecast(steps=len(daily_test))
-    forecast = pd.Series(forecast, index=daily_test.index)
+    forecast = pd.Series(forecast, index=daily_test.index) 
 
     # Align on index
     y_true, y_pred = daily_test.align(forecast, join="inner")
