@@ -56,7 +56,7 @@ def app():
 
     # -------------------- Feature Engineering --------------------
     # One-hot encode train_code (station)
-    encoder = OneHotEncoder(sparse=False, handle_unknown='ignore')
+    encoder = OneHotEncoder(sparse_output=False, handle_unknown='ignore')    
     train_code_encoded = encoder.fit_transform(df[["train_code"]])
     train_code_cols = [f"station_{c}" for c in encoder.categories_[0]]
     df_encoded = pd.concat([df.reset_index(drop=True), pd.DataFrame(train_code_encoded, columns=train_code_cols)], axis=1)
