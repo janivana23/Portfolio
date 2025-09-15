@@ -91,8 +91,8 @@ def app():
                         row["TOTAL_TAP_IN_VOLUME"],
                         row["TOTAL_TAP_OUT_VOLUME"]
                     ))
-                    conn.commit()
-                    st.success("✅ Data inserted into database!")
+                conn.commit()
+                st.success("✅ Data inserted into database!")
             except mysql.connector.Error as err:
                 st.error(f"MySQL error: {err}")
                 print(f"MySQL error: {err}")  # log to console
