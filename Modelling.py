@@ -88,13 +88,13 @@ def app():
     X_train = train_clean[["train_volume_day"]]
     y_train = train_clean["train_volume_tap_in"]
 
-    # Regression Model
-    model = LinearRegression()
-    model.fit(X_train, y_train)
-    y_pred = model.predict(X_test)
+    # # Regression Model
+    # model = LinearRegression()
+    # model.fit(X_train, y_train)
+    # y_pred = model.predict(X_test)
 
-    print("MSE:", mean_squared_error(y_test, y_pred))
-    print("R²:", r2_score(y_test, y_pred))
+    # print("MSE:", mean_squared_error(y_test, y_pred))
+    # print("R²:", r2_score(y_test, y_pred))
 
     
     daily_train = train.set_index("train_volume_year_month")["train_volume_tap_in"].resample("D").sum()
