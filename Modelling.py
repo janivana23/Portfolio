@@ -100,19 +100,18 @@ def app():
     # --- 3. Forecast October ---
     forecast = model_fit.forecast(steps=len(daily_test))
     forecast = pd.Series(forecast, index=daily_test.index)
-    
-    # Align on index and drop NaN/mismatches
+
+    # Align on index
     y_true, y_pred = daily_test.align(forecast, join="inner")
 
-    # Ensure equal length
-    if len(y_true) == 0 or len(y_pred) == 0:
-        st.error("⚠️ No overlapping dates between actuals and forecast.")
-    else:
-        # Trim to min length just in case
-        min_len = min(len(y_true), len(y_pred))
-        y_true = y_true.iloc[:min_len]
-        y_pred = y_pred.iloc[:min_len]
+    # Drop NaNs from both sides
+    mask = (~y_true.isna()) & (~y_pred.isna())
+    y_true = y_true[mask]
+    y_pred = y_pred[mask]
 
+    if len(y_true) == 0 or len(y_pred) == 0:
+        st.error("⚠️ No valid overlapping non-NaN values between actual and forecast.")
+    else:
         mse = mean_squared_error(y_true, y_pred)
         mae = mean_absolute_error(y_true, y_pred)
         rmse = np.sqrt(mse)
@@ -121,9 +120,9 @@ def app():
         st.write(f"MAE: {mae:.2f}")
         st.write(f"RMSE: {rmse:.2f}")
 
-    print(f"MSE: {mse:.2f}")
-    print(f"MAE: {mae:.2f}")
-    print(f"RMSE: {rmse:.2f}")
+        print(f"MSE: {mse:.2f}")
+        print(f"MAE: {mae:.2f}")
+        print(f"RMSE: {rmse:.2f}")
 
     # --- 5. Visualization ---
     plt.figure(figsize=(10,5))
