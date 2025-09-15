@@ -49,10 +49,6 @@ def app():
 
     #-----------------------------------------------------------------------------------------
     query = "SELECT * FROM TRAIN_VOLUME;"  # adjust columns as needed
-    df = pd.read_sql(query, conn)
-    conn.close()
-
-    print(df.head())
     listdtype = [("train_volume_tap_in", "int"), ("train_volume_tap_out", "int")]
     df = run_query(query, listdtype)
 
