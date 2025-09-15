@@ -69,8 +69,6 @@ def app():
 
         train = df[df["train_volume_year_month"].dt.to_period("M") == train_month]
         test  = df[df["train_volume_year_month"].dt.to_period("M") == test_month]
-
-        st.write(f"📅 Training month: {train_month}, Testing month: {test_month}")
     else:
         st.error("❌ Not enough months of data to split into train/test")
         train, test = pd.DataFrame(), pd.DataFrame()
@@ -107,9 +105,16 @@ def app():
     forecast = model_fit.forecast(steps=len(daily_test))
     forecast = pd.Series(forecast, index=daily_test.index)
 
+    # Align indexes
+    y_true, y_pred = daily_test.align(forecast, join="inner")
+
+    # Drop NaN
+    y_true = y_true.dropna()
+    y_pred = y_pred.dropna()
+
     # --- 4. Evaluate ---
-    mse = mean_squared_error(daily_test, forecast)
-    mae = mean_absolute_error(daily_test, forecast)
+    mse = mean_squared_error(y_true, y_pred)
+    mae = mean_absolute_error(y_true, y_pred)
     rmse = np.sqrt(mse)
 
     print(f"MSE: {mse:.2f}")
