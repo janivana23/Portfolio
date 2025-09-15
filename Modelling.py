@@ -61,15 +61,15 @@ def app():
     df["train_volume_day"] = df["train_volume_day"].map({"weekday": 0, "weekends/holiday": 1})
 
     st.write( "dtype:", df.dtypes)
-    st.write(df.head())
+    st.dataframe(df.head())
 
 
     #Split data to train and test
     train = df[df["train_volume_year_month"].dt.month == 9]   # September 2023
     test  = df[df["train_volume_year_month"].dt.month == 10]  # October 2023
 
-    st.write(train.head())
-    st.write(test.head())
+    st.dataframe(train.head())
+    st.dataframe(test.head())
 
 
     # Create x and y train test
