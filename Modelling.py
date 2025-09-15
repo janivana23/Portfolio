@@ -93,46 +93,14 @@ def app():
     model.fit(X_train, y_train)
     y_pred = model.predict(X_test)
 
-    print("MSE:", mean_squared_error(y_test, y_pred))
-    print("R²:", r2_score(y_test, y_pred))
+    st.write("MSE:", mean_squared_error(y_test, y_pred))
+    st.write("R²:", r2_score(y_test, y_pred))
 
-    
-    daily_train = train.set_index("train_volume_year_month")["train_volume_tap_in"].resample("D").sum()
-    daily_test  = test.set_index("train_volume_year_month")["train_volume_tap_in"].resample("D").sum()
-
-
-    # --- 3. Forecast October ---
-    forecast = model.fit(X_train, y_train).forecast(steps=len(daily_test))
-    forecast = pd.Series(forecast, index=daily_test.index) 
-
-    # Align on index
-    y_true, y_pred = daily_test.align(forecast, join="inner")
-
-    # Drop NaNs from both sides
-    mask = (~y_true.isna()) & (~y_pred.isna())
-    y_true = y_true[mask]
-    y_pred = y_pred[mask]
-
-    if len(y_true) == 0 or len(y_pred) == 0:
-        st.error("⚠️ No valid overlapping non-NaN values between actual and forecast.")
-    else:
-        mse = mean_squared_error(y_true, y_pred)
-        mae = mean_absolute_error(y_true, y_pred)
-        rmse = np.sqrt(mse)
-
-        st.write(f"MSE: {mse:.2f}")
-        st.write(f"MAE: {mae:.2f}")
-        st.write(f"RMSE: {rmse:.2f}")
-
-        print(f"MSE: {mse:.2f}")
-        print(f"MAE: {mae:.2f}")
-        print(f"RMSE: {rmse:.2f}")
-
-    # --- 5. Visualization ---
-    plt.figure(figsize=(10,5))
-    plt.plot(daily_train.index, daily_train, label="Train (Sept)")
-    plt.plot(daily_test.index, daily_test, label="Actual (Oct)", color="black")
-    plt.plot(forecast.index, forecast, label="Forecast (Oct)", color="red")
-    plt.legend()
-    plt.title("Forecast: Tap-In Volume")
-    plt.show()
+    # # --- 5. Visualization ---
+    # plt.figure(figsize=(10,5))
+    # plt.plot(daily_train.index, daily_train, label="Train (Sept)")
+    # plt.plot(daily_test.index, daily_test, label="Actual (Oct)", color="black")
+    # plt.plot(forecast.index, forecast, label="Forecast (Oct)", color="red")
+    # plt.legend()
+    # plt.title("Forecast: Tap-In Volume")
+    # plt.show()
