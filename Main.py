@@ -7,6 +7,7 @@ import random
 from datetime import datetime, timedelta
 from fastapi import FastAPI
 import os
+import requests
 
 # -------------------- Python File ----------------------------
 import Data
@@ -24,6 +25,16 @@ DB_NAME = st.secrets["mysql"]["database"]
 DB_PORT = 3306
 
 app = FastAPI()
+API_URL = "https://portfolio-tin0.onrender.com"
+
+st.title("MySQL Data via FastAPI")
+
+response = requests.get(API_URL)
+if response.status_code == 200:
+    data = response.json()
+    st.write(data)
+else:
+    st.error(f"Failed to fetch data. Status code: {response.status_code}")
 
 def get_connection():
     return mysql.connector.connect(
