@@ -1,10 +1,10 @@
--- INSERT SQL FILES (DDL)
--- Author: Janice Ivana
--- Date: 23/08/25
+/* INSERT SQL FILES (DDL)
+Author: Janice Ivana
+Date: 23/08/25
 
--- INSERT INTO URA (ura_area, ura_region)
+INSERT INTO URA (ura_area, ura_region)
 
--- CENTRAL REGION
+CENTRAL REGION */
 INSERT INTO URA (ura_area, ura_region) VALUES ('GEYLANG','CENTRAL REGION');
 INSERT INTO URA (ura_area, ura_region) VALUES ('TOA PAYOH','CENTRAL REGION');
 INSERT INTO URA (ura_area, ura_region) VALUES ('DOWNTOWN CORE','CENTRAL REGION');
@@ -55,7 +55,6 @@ INSERT INTO URA (ura_area, ura_region) VALUES ('CLEMENTI','WEST REGION');
 INSERT INTO URA (ura_area, ura_region) VALUES ('PIONEER','WEST REGION');
 INSERT INTO URA (ura_area, ura_region) VALUES ('TUAS','WEST REGION');
 
--------------------------------------------------------------------------------------------
 -- INSERT INTO TRAIN_STATION
 
 INSERT INTO TRAIN_STATION VALUES ('81 LORONG 25 GEYLANG ALJUNIED MRT STATION (EW9) SINGAPORE 388310',1.316432612, 103.882906, 'GEYLANG');
@@ -265,8 +264,6 @@ INSERT INTO TRAIN_STATION VALUES ('20 TUAS WEST DRIVE TUAS LINK MRT STATION (EW3
 INSERT INTO TRAIN_STATION VALUES ('131 PIONEER ROAD TUAS WEST ROAD MRT STATION (EW32) SINGAPORE 639609', 1.329985047, 103.6396166, 'TUAS');
 INSERT INTO TRAIN_STATION VALUES ('61 CHOA CHU KANG DRIVE YEW TEE MRT STATION (NS5) SINGAPORE 689715', 1.397535069, 103.7443708, 'CHOA CHU KANG');
 
-
---------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 --INSERT INTO TRAIN
 -- rollback;
@@ -482,7 +479,6 @@ INSERT INTO TRAIN VALUES('TE7', 'Bright Hill', 'Thomson-East Coast Line', STR_TO
 INSERT INTO TRAIN VALUES('TE8', 'Upper Thomson', 'Thomson-East Coast Line', STR_TO_DATE('08/28/2021', '%m/%d/%Y'), '1 JALAN KELI UPPER THOMSON MRT STATION (TE8) SINGAPORE 577937');
 INSERT INTO TRAIN VALUES('TE9', 'Caldecott', 'Thomson-East Coast Line', STR_TO_DATE('08/28/2021', '%m/%d/%Y'), '1 TOA PAYOH LINK CALDECOTT MRT STATION (TE9) SINGAPORE 297608');
 
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 --INSERT INTO TRAIN_VOLUME
 
