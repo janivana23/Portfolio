@@ -12,3 +12,5 @@ adjustText
 scikit-learn
 numpy
 statsmodels
+mysqlclient
+SQLAlchemy
