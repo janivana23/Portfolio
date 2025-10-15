@@ -13,15 +13,13 @@ def app():
     DB_HOST = st.secrets["mysql"]["host"]
     DB_NAME = st.secrets["mysql"]["database"]
     DB_PORT = 3306
-    DB_CA = st.secrets["mysql"]["ca"]
 
     conn = mysql.connector.connect(
         user=DB_USER,
         password=DB_PASSWORD,
         host=DB_HOST,
         database=DB_NAME,
-        port=DB_PORT,
-        ssl_ca=DB_CA
+        port=DB_PORT
     )
     
     @st.cache_data
