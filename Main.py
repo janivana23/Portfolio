@@ -5,9 +5,6 @@ import smtplib
 import ssl
 import random
 from datetime import datetime, timedelta
-from fastapi import FastAPI
-import os
-import requests
 
 # -------------------- Python File ----------------------------
 import Data
@@ -24,29 +21,15 @@ DB_HOST = st.secrets["mysql"]["host"]
 DB_NAME = st.secrets["mysql"]["database"]
 DB_PORT = 3306
 
-app = FastAPI()
-API_URL = "https://portfolio-tin0.onrender.com"
 
-st.title("MySQL Data via FastAPI")
+conn = mysql.connector.connect(
+    user=DB_USER,
+    password=DB_PASSWORD,
+    host=DB_HOST,
+    database=DB_NAME,
+    port=DB_PORT
+)
 
-response = requests.get(API_URL)
-if response.status_code == 200:
-    data = response.json()
-    st.write(data)
-else:
-    st.error(f"Failed to fetch data. Status code: {response.status_code}")
-
-def get_connection():
-    return mysql.connector.connect(
-        host=os.getenv("DB_HOST"),
-        user=os.getenv("DB_USER"),
-        password=os.getenv("DB_PASSWORD"),
-        database=os.getenv("DB_NAME")
-    )
-
-
-
-conn = get_connection()
 cur = conn.cursor(buffered=True)
 
 # -------------------- Email Setup --------------------
