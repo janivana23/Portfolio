@@ -82,7 +82,7 @@ def app():
 
     # -------------------- Random Forest Model --------------------
     st.subheader("Regression Model: Random Forest")
-    model = RandomForestRegressor(n_estimators=200, random_state=42)
+    model = RandomForestRegressor(n_estimators=500, random_state=42)
     model.fit(X_train, y_train)
     y_pred = model.predict(X_test)
 
@@ -118,9 +118,9 @@ def app():
 # -------------------- Gradient Boosting Model --------------------
     st.subheader("Regression Model: Gradient Boosting")
     model = GradientBoostingRegressor(
-        n_estimators=300, 
+        n_estimators=500, 
         learning_rate=0.1, 
-        max_depth=5, 
+        max_depth=10, 
         random_state=42
     )
     model.fit(X_train, y_train)
