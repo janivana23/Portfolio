@@ -80,6 +80,13 @@ def app():
     y_train = train_clean[target].values
     y_test  = test_clean[target].values
 
+    y_train_log = np.log1p(y_train)
+    y_test_log  = np.log1p(y_test)
+    model.fit(X_train, y_train_log)
+    y_pred_log = model.predict(X_test)
+    y_pred = np.expm1(y_pred_log)  # convert back
+
+
     # -------------------- Random Forest Model --------------------
     st.subheader("Regression Model: Random Forest")
     model = RandomForestRegressor(
