@@ -11,8 +11,9 @@ DROP TABLE IF EXISTS TRAIN_VOLUME;
 DROP TABLE IF EXISTS TRAIN;
 DROP TABLE IF EXISTS TRAIN_STATION;
 DROP TABLE IF EXISTS URA;
+DROP table if EXISTS verification_tokens;
 DROP TABLE IF EXISTS users;
-drop table if EXISTS verification_tokens;
+
 
 CREATE TABLE TRAIN (
     train_code            VARCHAR(4)   NOT NULL,
@@ -99,8 +100,10 @@ CREATE TABLE users (
 
 CREATE TABLE verification_tokens (
     user_id INT NOT NULL,
-    token_hash VARCHAR(255) NOT NULL,
+    token VARCHAR(255) NOT NULL,
     expires_at DATETIME NOT NULL,
-    PRIMARY KEY (user_id, token_hash),
-    FOREIGN KEY (user_id) REFERENCES users(id) 
+    PRIMARY KEY (user_id, token),
+    FOREIGN KEY (user_id) REFERENCES users(id) on delete cascade
 );
+
+commit;
