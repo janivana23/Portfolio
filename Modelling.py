@@ -80,30 +80,29 @@ def app():
     y_train = train_clean[target].values
     y_test  = test_clean[target].values
 
-    y_train_log = np.log1p(y_train)
+
+    # -------------------- Log-Transform Target --------------------
+    y_train_log = np.log1p(y_train)  # log(1 + y) to handle zeros
     y_test_log  = np.log1p(y_test)
 
-    y_pred_log = model.predict(X_test)
-    y_pred = np.expm1(y_pred_log)  # convert back
-
-
-    # -------------------- Random Forest Model --------------------
-    st.subheader("Regression Model: Random Forest")
+    # -------------------- Train Random Forest --------------------
     model = RandomForestRegressor(
         n_estimators=500,
-        max_depth=None,  # unlimited depth
-        max_features='sqrt',  # better generalization
+        max_features='sqrt',
         random_state=42
-    )    
-    model.fit(X_train, y_train_log)
+    )
+    model.fit(X_train, y_train_log)  # train on log-transformed target
 
+    # -------------------- Make Predictions --------------------
     y_pred_log = model.predict(X_test)
+
+    # Convert back to original scale
+    y_pred = np.expm1(y_pred_log)  # inverse of log1p
 
     # -------------------- Evaluation --------------------
     mse = mean_squared_error(y_test, y_pred)
     mae = mean_absolute_error(y_test, y_pred)
     r2  = r2_score(y_test, y_pred)
-
 
     st.write(f"MSE: {mse:.2f}")
     st.write(f"MAE: {mae:.2f}")
