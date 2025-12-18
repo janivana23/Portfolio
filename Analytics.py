@@ -163,15 +163,32 @@ def app():
 
 
 
-    # --- Hourly Ridership Heatmap by Line ---
+    # -------------------- Hourly Ridership Heatmap by Train --------------------
     st.subheader("Hourly Ridership Heatmap by Train")
 
-    line_hour = df.groupby(["train_name", "train_volume_hour"])["total_volume"].sum().unstack(fill_value=0)
-    line_hour = line_hour.sort_index(axis=1)  # ensure hours 0-23
+    line_hour = (
+        df.groupby(["train_name", "train_volume_hour"])["total_volume"]
+        .sum()
+        .unstack(fill_value=0)
+        .sort_index(axis=1)   # ensure hour order
+    )
+
+    # IMPORTANT: ensure integers for fmt="d"
+    line_hour = line_hour.astype(int)
 
     fig, ax = plt.subplots(figsize=(12,6))
-    sns.heatmap(line_hour, cmap="Blues", annot=True, fmt="d", linewidths=.5, ax=ax, cbar_kws={'label': 'Total Volume'})
-    ax.set_title("Hourly Ridership by Line")
+    sns.heatmap(
+        line_hour,
+        cmap="Blues",
+        annot=True,
+        fmt="d",
+        linewidths=0.5,
+        ax=ax,
+        cbar_kws={"label": "Total Volume"}
+    )
+
     ax.set_xlabel("Hour of Day")
-    ax.set_ylabel("Line")
+    ax.set_ylabel("Train")
+    ax.set_title("Hourly Ridership Heatmap by Train")
+
     st.pyplot(fig)
