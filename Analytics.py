@@ -82,52 +82,54 @@ def app():
     st.pyplot(fig)
 
 
-    # ---------------------------------------------------------------------------------------
-    query2 = "SELECT train_code, train_name, sum(train_volume_tap_in)as total_volume_in, sum(train_volume_tap_out) as total_volume_out  FROM TRAIN NATURAL JOIN TRAIN_VOLUME group by train_code, train_name order by total_volume_in desc, total_volume_out desc;"
-    listdtype = [("train_volume_tap_in", "int"), ("train_volume_tap_out", "int"), ("train_start_operation", "datetime")]
 
-    # df = run_query(query2, listdtype)
+
+    # -------------------- Load aggregated station data --------------------
+    query2 = "SELECT train_code, train_name, SUM(train_volume_tap_in) AS total_volume_in, SUM(train_volume_tap_out) AS total_volume_out FROM TRAIN NATURAL JOIN TRAIN_VOLUME GROUP BY train_code, train_name ORDER BY total_volume_in DESC, total_volume_out DESC;"
+
+    listdtype = [
+        ("total_volume_in", "int"),
+        ("total_volume_out", "int")
+    ]
+
+    df = run_query(query2, listdtype)
     df.columns = df.columns.str.lower()
 
-    # --- Top 10 Busiest Stations ---
+    # Calculate total_volume for plotting
+    df["total_volume"] = df["total_volume_in"] + df["total_volume_out"]
+
+    # -------------------- Top 10 Busiest Stations --------------------
     st.subheader("Top 10 Busiest Stations")
 
-    df = run_query(query2, listdtype=[("total_volume_in", "int"), ("total_volume_out", "int")])
-    df.columns = df.columns.str.lower()
-    df["total_volume"] = df["total_volume_in"] + df["total_volume_out"]
-    top10 = df.groupby(["train_code", "train_name"])["total_volume"].sum().nlargest(10)
-
-    fig, ax = plt.subplots()
-    top10.plot(kind="bar", ax=ax)
+    top10 = df.nlargest(10, "total_volume")
+    fig, ax = plt.subplots(figsize=(10,5))
+    ax.bar(top10["train_name"], top10["total_volume"], color="skyblue")
     ax.set_ylabel("Total Volume")
     ax.set_title("Top 10 Busiest Stations")
+    plt.xticks(rotation=45, ha="right")
     st.pyplot(fig)
 
-    # --- Tap-in vs Tap-out by Station ---
+    # -------------------- Tap-in vs Tap-out by Station --------------------
     st.subheader("Tap-in vs Tap-out by Station")
 
-    station_vol = df.groupby(["train_code", "train_name"])[["train_volume_tap_in", "train_volume_tap_out"]].sum()
-    station_vol["total_volume"] = station_vol["train_volume_tap_in"] + station_vol["train_volume_tap_out"]
+    fig, ax = plt.subplots(figsize=(10,7))
+    ax.scatter(df["total_volume_in"], df["total_volume_out"], color="dodgerblue", alpha=0.7)
 
-    # Take top 10 stations
-    top10 = station_vol.sort_values("total_volume", ascending=False).head(10)
-
-    fig, ax = plt.subplots()
-    ax.scatter(station_vol["train_volume_tap_in"], station_vol["train_volume_tap_out"])
-
+    # Annotate top 10 stations
     texts = []
-    for station, row in top10.iterrows():
+    for _, row in top10.iterrows():
         texts.append(
-            ax.text(row["train_volume_tap_in"], row["train_volume_tap_out"], station, fontsize=6)
+            ax.text(
+                row["total_volume_in"], row["total_volume_out"], 
+                row["train_name"], fontsize=8
+            )
         )
 
-    # increase expand_text and force_text to push labels further
     adjust_text(
-        texts, 
-        ax=ax,
-        expand_text=(1.2, 1.4),   # push labels further from each other
-        expand_points=(1.2, 1.4), 
-        force_text=(0.5, 1.0),    # stronger repulsion between labels
+        texts, ax=ax,
+        expand_text=(1.2, 1.4),
+        expand_points=(1.2, 1.4),
+        force_text=(0.5, 1.0),
         arrowprops=dict(arrowstyle="->", color="gray", lw=0.5)
     )
 
@@ -135,6 +137,7 @@ def app():
     ax.set_ylabel("Tap-out Volume")
     ax.set_title("Tap-in vs Tap-out by Station")
     st.pyplot(fig)
+
 
 
     # --- Ridership Trend Over Time ---
