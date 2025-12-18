@@ -101,7 +101,7 @@ def app():
     # -------------------- Top 10 Busiest Stations --------------------
     st.subheader("Top 10 Busiest Stations")
 
-    top10 = df.nlargest(20, "total_volume")
+    top10 = df.nlargest(18, "total_volume")
     fig, ax = plt.subplots(figsize=(10,5))
     ax.bar(top10["train_name"], top10["total_volume"], color="skyblue")
     ax.set_ylabel("Total Volume")
@@ -144,11 +144,16 @@ def app():
     st.subheader("Ridership Trend Over Time")
 
     daily_volume = df.groupby('train_volume_hour')[['total_volume_in', 'total_volume_out']].sum()
-    daily_volume['total_volume'] = daily_volume.sum(axis=1)
+    # Total volume
+    daily_volume["total_volume"] = (
+        daily_volume["total_volume_in"] + daily_volume["total_volume_out"]
+    )
 
+    # Ensure correct hour order
+    daily_volume = daily_volume.sort_index()
 
     fig, ax = plt.subplots(figsize=(10,5))
-    ax.plot(daily_volume.index, daily_volume.values, marker='o', linestyle='-')
+    ax.plot(daily_volume.index, daily_volume["total_volume"], marker='o', linestyle='-')
     ax.set_xlabel("Hour")
     ax.set_ylabel("Total Volume")
     ax.set_title("Daily Ridership Trend")
