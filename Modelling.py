@@ -80,6 +80,7 @@ def app():
     y_train = train_clean[target].values
     y_test  = test_clean[target].values
 
+    
 
     # -------------------- Log-Transform Target --------------------
     y_train_log = np.log1p(y_train)  # log(1 + y) to handle zeros
@@ -89,6 +90,7 @@ def app():
     model = RandomForestRegressor(
         n_estimators=500,
         max_features='sqrt',
+        max_depth=None,
         random_state=42
     )
     model.fit(X_train, y_train_log)  # train on log-transformed target
@@ -98,6 +100,7 @@ def app():
 
     # Convert back to original scale
     y_pred = np.expm1(y_pred_log)  # inverse of log1p
+
 
     # -------------------- Evaluation --------------------
     mse = mean_squared_error(y_test, y_pred)
