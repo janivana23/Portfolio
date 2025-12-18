@@ -12,6 +12,7 @@ DROP TABLE IF EXISTS TRAIN;
 DROP TABLE IF EXISTS TRAIN_STATION;
 DROP TABLE IF EXISTS URA;
 DROP TABLE IF EXISTS users;
+drop table if EXISTS verification_tokens;
 
 CREATE TABLE TRAIN (
     train_code            VARCHAR(4)   NOT NULL,
@@ -94,4 +95,12 @@ CREATE TABLE users (
     email    varchar(50)  NOT NULL,
     password_hash varchar(100) not null,
     CONSTRAINT USERS_UQ UNIQUE (username, email, password_hash)
+);
+
+CREATE TABLE verification_tokens (
+    user_id INT NOT NULL,
+    token_hash VARCHAR(255) NOT NULL,
+    expires_at DATETIME NOT NULL,
+    PRIMARY KEY (user_id, token_hash),
+    FOREIGN KEY (user_id) REFERENCES users(id) 
 );
