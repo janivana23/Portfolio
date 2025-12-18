@@ -2,7 +2,6 @@
 Author: Janice Ivana
 Date: 23/08/25
 
-INSERT INTO URA (ura_area, ura_region)
 
 CENTRAL REGION */
 INSERT INTO URA (ura_area, ura_region) VALUES ('GEYLANG','CENTRAL REGION');
@@ -480,7 +479,6 @@ INSERT INTO TRAIN VALUES('TE8', 'Upper Thomson', 'Thomson-East Coast Line', STR_
 INSERT INTO TRAIN VALUES('TE9', 'Caldecott', 'Thomson-East Coast Line', STR_TO_DATE('08/28/2021', '%m/%d/%Y'), '1 TOA PAYOH LINK CALDECOTT MRT STATION (TE9) SINGAPORE 297608');
 
 
-/*INSERT INTO TRAIN_VOLUME*/
 
 
 INSERT INTO TRAIN_VOLUME (train_volume_year_month, train_volume_day, train_volume_hour, train_code, train_volume_tap_in, train_volume_tap_out) VALUES (STR_TO_DATE('2023-10-01', '%Y-%m-%d'),'weekends/holiday',11, 'NS7',10207,11033);
