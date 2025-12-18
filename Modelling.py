@@ -53,11 +53,11 @@ def app():
 
     # Split by last 2 months
     months = df["train_volume_year_month"].dt.to_period("M").unique()
-    if len(months) < 1:
+    if len(months) < 2:
         st.error("❌ Not enough months to split train/test")
         return
 
-    train_month, test_month = months[0], months[1]
+    train_month, test_month = months[-2], months[-1]
     train = df[df["train_volume_year_month"].dt.to_period("M") == train_month]
     test  = df[df["train_volume_year_month"].dt.to_period("M") == test_month]
 
