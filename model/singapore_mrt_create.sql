@@ -99,11 +99,18 @@ CREATE TABLE users (
 );
 
 CREATE TABLE verification_tokens (
+    id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
-    token VARCHAR(255) NOT NULL,
+    token VARCHAR(10) NOT NULL,
     expires_at DATETIME NOT NULL,
-    PRIMARY KEY (user_id, token),
-    FOREIGN KEY (user_id) REFERENCES users(id) on delete cascade
+    used BOOLEAN DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_verification_user
+        FOREIGN KEY (user_id)
+        REFERENCES users(id)
+        ON DELETE CASCADE
 );
+
 
 commit;
