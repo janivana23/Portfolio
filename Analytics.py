@@ -101,7 +101,7 @@ def app():
     # -------------------- Top 10 Busiest Stations --------------------
     st.subheader("Top 10 Busiest Stations")
 
-    top10 = df.nlargest(15, "total_volume")
+    top10 = df.nlargest(20, "total_volume")
     fig, ax = plt.subplots(figsize=(10,5))
     ax.bar(top10["train_name"], top10["total_volume"], color="skyblue")
     ax.set_ylabel("Total Volume")
@@ -143,22 +143,29 @@ def app():
     # --- Ridership Trend Over Time ---
     st.subheader("Ridership Trend Over Time")
 
-    daily_volume = df.groupby("train_volume_hour")["total_volume"].sum()
+    df['date'] = df['train_volume_year_month'].dt.date  # extract date
+    daily_volume = df.groupby('date')['total_volume'].sum()
 
-    fig, ax = plt.subplots()
-    daily_volume.plot(ax=ax)
-    ax.set_xlabel("Hour")
+    fig, ax = plt.subplots(figsize=(10,5))
+    ax.plot(daily_volume.index, daily_volume.values, marker='o', linestyle='-')
+    ax.set_xlabel("Date")
     ax.set_ylabel("Total Volume")
     ax.set_title("Daily Ridership Trend")
+    plt.xticks(rotation=45)
+    plt.grid(True, linestyle='--', alpha=0.5)
     st.pyplot(fig)
+
 
 
     # --- Hourly Ridership Heatmap by Line ---
     st.subheader("Hourly Ridership Heatmap by Line")
 
-    line_hour = df.groupby(["train_line_name", "train_volume_hour"])["total_volume"].sum().unstack()
+    line_hour = df.groupby(["train_line_name", "train_volume_hour"])["total_volume"].sum().unstack(fill_value=0)
+    line_hour = line_hour.sort_index(axis=1)  # ensure hours 0-23
 
-    fig, ax = plt.subplots(figsize=(10,6))
-    sns.heatmap(line_hour, cmap="Blues", ax=ax)
+    fig, ax = plt.subplots(figsize=(12,6))
+    sns.heatmap(line_hour, cmap="Blues", annot=True, fmt="d", linewidths=.5, ax=ax, cbar_kws={'label': 'Total Volume'})
     ax.set_title("Hourly Ridership by Line")
+    ax.set_xlabel("Hour of Day")
+    ax.set_ylabel("Line")
     st.pyplot(fig)
