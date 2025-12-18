@@ -82,7 +82,7 @@ def app():
 
     y_train_log = np.log1p(y_train)
     y_test_log  = np.log1p(y_test)
-    model.fit(X_train, y_train_log)
+
     y_pred_log = model.predict(X_test)
     y_pred = np.expm1(y_pred_log)  # convert back
 
@@ -95,13 +95,15 @@ def app():
         max_features='sqrt',  # better generalization
         random_state=42
     )    
-    model.fit(X_train, y_train)
-    y_pred = model.predict(X_test)
+    model.fit(X_train, y_train_log)
+
+    y_pred_log = model.predict(X_test)
 
     # -------------------- Evaluation --------------------
     mse = mean_squared_error(y_test, y_pred)
     mae = mean_absolute_error(y_test, y_pred)
     r2  = r2_score(y_test, y_pred)
+
 
     st.write(f"MSE: {mse:.2f}")
     st.write(f"MAE: {mae:.2f}")
