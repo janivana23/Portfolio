@@ -41,7 +41,7 @@ def app():
         return df
 
     # -------------------- Load Data --------------------
-    query = "SELECT * FROM TRAIN_VOLUME;"
+    query = "SELECT * FROM TRAIN_VOLUME order by train_volume_year_month;"
     listdtype = [("train_volume_tap_in", "int"), ("train_volume_tap_out", "int")]
     df = run_query(query, listdtype)
 
@@ -57,7 +57,7 @@ def app():
         st.error("❌ Not enough months to split train/test")
         return
 
-    train_month, test_month = months[-2], months[-1]
+    train_month, test_month = months[0], months[1]
     train = df[df["train_volume_year_month"].dt.to_period("M") == train_month]
     test  = df[df["train_volume_year_month"].dt.to_period("M") == test_month]
 
