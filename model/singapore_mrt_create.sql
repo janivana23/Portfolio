@@ -104,13 +104,14 @@ CREATE TABLE verification_tokens (
     token VARCHAR(10) NOT NULL,
     expires_at DATETIME NOT NULL,
     used BOOLEAN DEFAULT 0,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 
-    CONSTRAINT fk_verification_user
-        FOREIGN KEY (user_id)
-        REFERENCES users(id)
-        ON DELETE CASCADE
 );
+
+
+ALTER TABLE verification_tokens
+    ADD CONSTRAINT verification_tokens_users_fk FOREIGN KEY (user_id)
+    REFERENCES users (id);
 
 
 commit;
