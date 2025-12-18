@@ -93,7 +93,7 @@ def app():
     st.subheader("Top 10 Busiest Stations")
 
     df["total_volume"] = df["train_volume_tap_in"] + df["train_volume_tap_out"]
-    top10 = df.groupby("train_name")["total_volume"].sum().nlargest(10)
+    top10 = df.groupby("train_code")["total_volume"].sum().nlargest(10)
 
     fig, ax = plt.subplots()
     top10.plot(kind="bar", ax=ax)
@@ -104,7 +104,7 @@ def app():
     # --- Tap-in vs Tap-out by Station ---
     st.subheader("Tap-in vs Tap-out by Station")
 
-    station_vol = df.groupby("train_name")[["train_volume_tap_in", "train_volume_tap_out"]].sum()
+    station_vol = df.groupby("train_code")[["train_volume_tap_in", "train_volume_tap_out"]].sum()
     station_vol["total_volume"] = station_vol["train_volume_tap_in"] + station_vol["train_volume_tap_out"]
 
     # Take top 10 stations
