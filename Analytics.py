@@ -86,13 +86,15 @@ def app():
     query2 = "SELECT train_code, train_name, sum(train_volume_tap_in)as total_volume_in, sum(train_volume_tap_out) as total_volume_out  FROM TRAIN NATURAL JOIN TRAIN_VOLUME group by train_code, train_name order by total_volume_in desc, total_volume_out desc;"
     listdtype = [("train_volume_tap_in", "int"), ("train_volume_tap_out", "int"), ("train_start_operation", "datetime")]
 
-    df = run_query(query2, listdtype)
+    # df = run_query(query2, listdtype)
     df.columns = df.columns.str.lower()
 
     # --- Top 10 Busiest Stations ---
     st.subheader("Top 10 Busiest Stations")
 
-    df["total_volume"] = df["train_volume_tap_in"] + df["train_volume_tap_out"]
+    df = run_query(query2, listdtype=[("total_volume_in", "int"), ("total_volume_out", "int")])
+    df.columns = df.columns.str.lower()
+    df["total_volume"] = df["total_volume_in"] + df["total_volume_out"]
     top10 = df.groupby(["train_code", "train_name"])["total_volume"].sum().nlargest(10)
 
     fig, ax = plt.subplots()
