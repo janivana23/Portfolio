@@ -8,7 +8,7 @@ def app():
     st.markdown(
         """
         This dashboard provides an integrated analytical view of Singapore MRT ridership
-        by combining **geospatial station information** with **hourly passenger volume data**.
+        by combining **geospatial station information** with **hourly passenger volume data** inclusive from September 2023 to October 2023.
 
         It is designed to support:
         - Understanding spatial distribution of ridership demand
