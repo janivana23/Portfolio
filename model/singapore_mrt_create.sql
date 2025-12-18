@@ -104,6 +104,7 @@ CREATE TABLE verification_tokens (
     token VARCHAR(10) NOT NULL,
     expires_at DATETIME NOT NULL,
     used BOOLEAN DEFAULT 0,
+    is_verified BOOLEAN DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 
 );
