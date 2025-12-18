@@ -98,6 +98,8 @@ CREATE TABLE users (
     CONSTRAINT USERS_UQ UNIQUE (username, email, password_hash)
 );
 
+ALTER TABLE users ADD is_verified BOOLEAN DEFAULT 0;
+
 CREATE TABLE verification_tokens (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
@@ -110,7 +112,6 @@ CREATE TABLE verification_tokens (
 
 
 
-ALTER TABLE verification_tokens ADD is_verified BOOLEAN DEFAULT 0;
 ALTER TABLE verification_tokens
     ADD CONSTRAINT verification_tokens_users_fk FOREIGN KEY (user_id)
     REFERENCES users (id);
