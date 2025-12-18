@@ -101,7 +101,7 @@ def app():
     # -------------------- Top 10 Busiest Stations --------------------
     st.subheader("Top 10 Busiest Stations")
 
-    top10 = df.nlargest(10, "total_volume")
+    top10 = df.nlargest(15, "total_volume")
     fig, ax = plt.subplots(figsize=(10,5))
     ax.bar(top10["train_name"], top10["total_volume"], color="skyblue")
     ax.set_ylabel("Total Volume")
