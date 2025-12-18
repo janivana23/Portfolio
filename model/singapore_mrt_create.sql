@@ -92,5 +92,6 @@ CREATE TABLE users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     username     varchar(50)  NOT NULL,
     email    varchar(50)  NOT NULL,
-    CONSTRAINT USERS_UQ UNIQUE (username, email)
+    password_hash varchar(100) not null,
+    CONSTRAINT USERS_UQ UNIQUE (username, email, password_hash)
 );
