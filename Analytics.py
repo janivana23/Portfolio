@@ -143,8 +143,11 @@ def app():
     # --- Ridership Trend Over Time ---
     st.subheader("Ridership Trend Over Time")
 
-    df['date'] = df['train_volume_year_month'].dt.date  # extract date
-    daily_volume = df.groupby('date')['total_volume'].sum()
+    df['train_volume_year_month'] = pd.to_datetime(df['train_volume_year_month'])
+    df['date'] = df['train_volume_year_month'].dt.date
+    daily_volume = df.groupby(df['train_volume_year_month'].dt.date)['train_volume_tap_in','train_volume_tap_out'].sum()
+    daily_volume['total_volume'] = daily_volume.sum(axis=1)
+
 
     fig, ax = plt.subplots(figsize=(10,5))
     ax.plot(daily_volume.index, daily_volume.values, marker='o', linestyle='-')
