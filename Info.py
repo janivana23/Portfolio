@@ -1,143 +1,156 @@
 import streamlit as st
 
 def app():
-    st.title("ℹ️ Information, Geography & Data Context")
+    st.title("Information & Data Overview")
 
-    # -------------------- Dashboard Purpose --------------------
-    st.header("Dashboard Purpose")
     st.markdown(
         """
-        This dashboard provides an integrated analytical view of Singapore MRT ridership
-        by combining **geospatial station information** with **hourly passenger volume data** inclusive from September 2023 to October 2023.
-
-        It is designed to support:
-        - Understanding spatial distribution of ridership demand
-        - Identifying high-traffic stations and regions
-        - Exploring temporal travel patterns across the rail network
-        - Demonstrating applied data analytics and geospatial visualisation techniques
+        This page provides background information about the dashboard,  
+        including data sources, geographical context, and project credits.
         """
     )
 
-    # -------------------- Geospatial Data & Map --------------------
-    st.header("Geospatial Mapping")
+    st.divider()
+
+    # ==============================
+    # Project Overview
+    # ==============================
+    st.header("Project Overview")
+
+    col1, col2, col3 = st.columns(3)
+
+    with col1:
+        st.info(
+            """
+            🚇 **Scope**  
+            Analysis of Singapore MRT ridership patterns across stations,
+            time periods, and train lines.
+            """
+        )
+
+    with col2:
+        st.info(
+            """
+            🗺️ **Geographical Focus**  
+            Station-level analysis using latitude, longitude,
+            station address, and URA planning regions.
+            """
+        )
+
+    with col3:
+        st.info(
+            """
+            📊 **Analytical Focus**  
+            Exploratory analysis, temporal trends, geospatial insights,
+            and predictive modelling.
+            """
+        )
+
+    # ==============================
+    # Dashboard Structure
+    # ==============================
+    st.divider()
+    st.header("Dashboard Structure")
+
     st.markdown(
         """
-        The interactive map component visualises MRT stations using geographic coordinates.
-        Each station is positioned based on latitude and longitude and enriched with
-        contextual metadata.
+        The dashboard is organised into the following sections:
 
-        **Mapped attributes include:**
-        - Train station name and code
-        - Physical station address
-        - URA planning region
-        - MRT line affiliation
-        - Aggregated ridership indicators
+        - **Geospatial Overview**  
+          Interactive map displaying MRT station locations, URA regions,
+          and surrounding geographical context.
 
-        The map enables spatial comparison of stations and highlights how ridership demand
-        varies across different regions of Singapore.
+        - **Ridership Analytics**  
+          Hourly, daily, and station-level ridership trends, including
+          comparisons between tap-in and tap-out volumes (Data Inclusive from September 2023 - October 2023).
+
+        - **Predictive Modelling**  
+          Machine learning models used to explore and forecast ridership behaviour.
+
+        - **Information & Credits**  
+          Data description, sources, and project acknowledgements.
         """
     )
 
-    # -------------------- Station Metadata --------------------
-    st.header("Station Information")
+    # ==============================
+    # Geographical & Station Data
+    # ==============================
+    st.divider()
+    st.header("Geographical & Station Information")
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.markdown(
+            """
+            **Station Attributes Included:**
+            - MRT station name  
+            - Station address  
+            - Latitude and longitude  
+            - Train line  
+            - URA planning region  
+            """
+        )
+
+    with col2:
+        st.markdown(
+            """
+            **Geospatial Use Cases:**
+            - Visualising station distribution across Singapore  
+            - Identifying regional demand patterns  
+            - Comparing ridership intensity by location  
+            """
+        )
+
+    # ==============================
+    # Data Source
+    # ==============================
+    st.divider()
+    st.header("Data Source")
+
     st.markdown(
         """
-        Each train station is associated with descriptive metadata that provides
-        real-world context beyond passenger counts.
+        The dataset used in this dashboard contains aggregated MRT ridership
+        information and station metadata.
 
-        **Station-level information includes:**
-        - Station name and station code
-        - Official address
-        - URA planning region
-        - MRT line name
-        - Operational status and service coverage
+        **Key Characteristics:**
+        - Public transport ridership data  
+        - Time-based attributes (hour, date)  
+        - Station-level aggregation  
+        - No personally identifiable information (PII)  
 
-        This information allows users to relate ridership patterns to
-        land use, urban density, and regional activity.
+        The data is intended for **educational, analytical, and research purposes**.
         """
     )
 
-    # -------------------- URA Planning Regions --------------------
-    st.header("URA Planning Regions")
-    st.markdown(
-        """
-        Stations are categorised by **URA Planning Region**, which reflects Singapore’s
-        official urban planning structure.
+    # ==============================
+    # Credits & Disclaimer
+    # ==============================
+    st.divider()
+    st.header("Credits & Disclaimer")
 
-        Examples include:
-        - Central Region
-        - East Region
-        - North Region
-        - North-East Region
-        - West Region
+    col1, col2 = st.columns(2)
 
-        Grouping stations by URA region enables higher-level analysis of
-        commuter movement and regional transport demand.
-        """
-    )
+    with col1:
+        st.markdown(
+            """
+            **Developed By:**  
+            Janice Ivana  
 
-    # -------------------- Data Sources --------------------
-    st.header("Data Sources")
-    st.markdown(
-        """
-        The data used in this dashboard originates from publicly available and
-        authoritative sources.
+            **Field of Study:**  
+            Computer Science / Data Science  
 
-        **Primary sources include:**
-        - Singapore public transport datasets (e.g. LTA / Data.gov.sg)
-        - Kaggle
+            **Purpose:**  
+            Academic project and data analytics portfolio
+            """
+        )
 
-        All datasets are stored in a structured MySQL database and queried dynamically
-        for analysis and visualisation.
-        """
-    )
-
-    # -------------------- Data Processing & Assumptions --------------------
-    st.header("Data Processing & Assumptions")
-    st.markdown(
-        """
-        To ensure analytical consistency, the following steps were applied:
-
-        - Removal of incomplete or invalid records
-        - Standardisation of station names and codes
-        - Aggregation of ridership data at hourly, station, and regional levels
-        - Alignment of station metadata with ridership records via relational joins
-
-        Some external factors such as weather conditions, special events,
-        and service disruptions are not included in the dataset.
-        """
-    )
-
-    # -------------------- Credits --------------------
-    st.header("Credits & Acknowledgements")
-    st.markdown(
-        """
-        **Developed by:**  
-        Janice Ivana  
-
-        **Tools & Technologies:**
-        - Python
-        - Streamlit
-        - Pandas, NumPy
-        - Matplotlib, Seaborn
-        - Scikit-learn
-        - MySQL
-        - Geospatial mapping libraries
-
-        **Acknowledgements:**
-        - Singapore Land Transport Authority (LTA)
-        - Urban Redevelopment Authority (URA)
-        - Data.gov.sg
-        - Open-source Python community
-        """
-    )
-
-    # -------------------- Disclaimer --------------------
-    st.header("Disclaimer")
-    st.markdown(
-        """
-        This dashboard is developed for educational and analytical purposes only.
-        It does not represent official transport statistics or policy decisions
-        by any government authority.
-        """
-    )
+    with col2:
+        st.warning(
+            """
+            ⚠️ **Disclaimer**  
+            This dashboard is for analytical and educational use only.
+            Visualisations and models do not represent official transport
+            forecasts or policy recommendations.
+            """
+        )
