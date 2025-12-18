@@ -143,8 +143,6 @@ def app():
     # --- Ridership Trend Over Time ---
     st.subheader("Ridership Trend Over Time")
 
-    df['train_volume_year_month'] = pd.to_datetime(df['train_volume_year_month'])
-    df['date'] = df['train_volume_year_month'].dt.date
     daily_volume = df.groupby('train_volume_hour')[['total_volume_in', 'total_volume_out']].sum()
     daily_volume['total_volume'] = daily_volume.sum(axis=1)
 
@@ -161,9 +159,9 @@ def app():
 
 
     # --- Hourly Ridership Heatmap by Line ---
-    st.subheader("Hourly Ridership Heatmap by Line")
+    st.subheader("Hourly Ridership Heatmap by Train")
 
-    line_hour = df.groupby(["train_line_name", "train_volume_hour"])["total_volume"].sum().unstack(fill_value=0)
+    line_hour = df.groupby(["train_name", "train_volume_hour"])["total_volume"].sum().unstack(fill_value=0)
     line_hour = line_hour.sort_index(axis=1)  # ensure hours 0-23
 
     fig, ax = plt.subplots(figsize=(12,6))
