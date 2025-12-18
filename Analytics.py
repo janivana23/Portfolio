@@ -145,7 +145,7 @@ def app():
 
     df['train_volume_year_month'] = pd.to_datetime(df['train_volume_year_month'])
     df['date'] = df['train_volume_year_month'].dt.date
-    daily_volume = df.groupby('date')['total_volume_in','total_volume_out'].sum()
+    daily_volume = df.groupby('date')[['total_volume_in', 'total_volume_out']].sum()
     daily_volume['total_volume'] = daily_volume.sum(axis=1)
 
 
