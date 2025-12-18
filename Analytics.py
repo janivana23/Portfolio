@@ -85,7 +85,7 @@ def app():
 
 
     # -------------------- Load aggregated station data --------------------
-    query2 = "SELECT train_code, train_name, SUM(train_volume_tap_in) AS total_volume_in, SUM(train_volume_tap_out) AS total_volume_out, train_volume_hour FROM TRAIN NATURAL JOIN TRAIN_VOLUME GROUP BY train_code, train_name ORDER BY total_volume_in DESC, total_volume_out DESC;"
+    query2 = "SELECT train_code, train_name,train_line_name, SUM(train_volume_tap_in) AS total_volume_in, SUM(train_volume_tap_out) AS total_volume_out, train_volume_hour FROM TRAIN NATURAL JOIN TRAIN_VOLUME GROUP BY train_code, train_name ORDER BY total_volume_in DESC, total_volume_out DESC;"
 
     listdtype = [
         ("total_volume_in", "int"),
@@ -166,7 +166,7 @@ def app():
     st.subheader("Hourly Ridership Heatmap by Line")
 
     line_hour = (
-        df.groupby(["train_name", "train_volume_hour"])["total_volume"]
+        df.groupby(["train_line_name", "train_volume_hour"])["total_volume"]
         .sum()
         .unstack(fill_value=0)
         .sort_index(axis=1)
