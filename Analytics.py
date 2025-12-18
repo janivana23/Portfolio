@@ -85,7 +85,7 @@ def app():
 
 
     # -------------------- Load aggregated station data --------------------
-    query2 = "SELECT train_code, train_name, SUM(train_volume_tap_in) AS total_volume_in, SUM(train_volume_tap_out) AS total_volume_out, train_volume_year_month FROM TRAIN NATURAL JOIN TRAIN_VOLUME GROUP BY train_code, train_name ORDER BY total_volume_in DESC, total_volume_out DESC;"
+    query2 = "SELECT train_code, train_name, SUM(train_volume_tap_in) AS total_volume_in, SUM(train_volume_tap_out) AS total_volume_out, train_volume_hour FROM TRAIN NATURAL JOIN TRAIN_VOLUME GROUP BY train_code, train_name ORDER BY total_volume_in DESC, total_volume_out DESC;"
 
     listdtype = [
         ("total_volume_in", "int"),
@@ -145,13 +145,13 @@ def app():
 
     df['train_volume_year_month'] = pd.to_datetime(df['train_volume_year_month'])
     df['date'] = df['train_volume_year_month'].dt.date
-    daily_volume = df.groupby('date')[['total_volume_in', 'total_volume_out']].sum()
+    daily_volume = df.groupby('train_volume_hour')[['total_volume_in', 'total_volume_out']].sum()
     daily_volume['total_volume'] = daily_volume.sum(axis=1)
 
 
     fig, ax = plt.subplots(figsize=(10,5))
     ax.plot(daily_volume.index, daily_volume.values, marker='o', linestyle='-')
-    ax.set_xlabel("Date")
+    ax.set_xlabel("Hour")
     ax.set_ylabel("Total Volume")
     ax.set_title("Daily Ridership Trend")
     plt.xticks(rotation=45)
