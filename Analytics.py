@@ -93,7 +93,7 @@ def app():
     st.subheader("Top 10 Busiest Stations")
 
     df["total_volume"] = df["train_volume_tap_in"] + df["train_volume_tap_out"]
-    top10 = df.groupby(["train_code", "train_name"])["total_volume"].sum()
+    top10 = df.groupby(["train_code", "train_name"])["total_volume"].sum().nlargest(10)
 
     fig, ax = plt.subplots()
     top10.plot(kind="bar", ax=ax)
