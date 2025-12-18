@@ -69,6 +69,7 @@ def app():
 
             try:
                 st.write("Please give a few minutes if it is a large dataset")
+                st.write("Don't Refresh or Exit the page while uploading...")
                 st.write("Loading...")
                 for _, row in df_expanded.iterrows():
                     cur.execute("""
@@ -91,7 +92,7 @@ def app():
                         row["TOTAL_TAP_IN_VOLUME"],
                         row["TOTAL_TAP_OUT_VOLUME"]
                     ))
-                    conn.commit()
+                conn.commit()
                 st.success("✅ Data inserted into database!")
             except mysql.connector.Error as err:
                 st.error(f"MySQL error: {err}")
