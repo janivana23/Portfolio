@@ -1,0 +1,19 @@
+{
+    "sqltools.connections": [
+        {
+            "mysqlOptions": {
+                "authProtocol": "default",
+                "enableSsl": "Disabled"
+            },
+            "ssh": "Disabled",
+            "previewLimit": 50,
+            "server": "sql12.freesqldatabase.com",
+            "port": 3306,
+            "driver": "MySQL",
+            "name": "sg_mrt",
+            "database": "sql12812272",
+            "username": "sql12812272",
+            "password": "JJHjpsRQPM"
+        }
+    ]
+}
