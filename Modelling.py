@@ -80,26 +80,21 @@ def app():
     y_train = train_clean[target].values
     y_test  = test_clean[target].values
 
-    
 
-    # -------------------- Log-Transform Target --------------------
-    y_train_log = np.log1p(y_train)  # log(1 + y) to handle zeros
-    y_test_log  = np.log1p(y_test)
-
-    # -------------------- Train Random Forest --------------------
+    # -------------------- Random Forest Model --------------------
+    st.subheader("Regression Model: Random Forest")
     model = RandomForestRegressor(
         n_estimators=500,
-        max_features='sqrt',
-        max_depth=None,
+        max_depth=None,  # unlimited depth
+        max_features='sqrt',  # better generalization
         random_state=42
-    )
-    model.fit(X_train, y_train_log)  # train on log-transformed target
+    )    
+    model.fit(X_train, y_train)
+    y_pred = model.predict(X_test)
 
-    # -------------------- Make Predictions --------------------
-    y_pred_log = model.predict(X_test)
-
-    # Convert back to original scale
-    y_pred = np.expm1(y_pred_log)  # inverse of log1p
+    hourly_test = test_clean.groupby('train_volume_hour')['train_volume_tap_in'].sum()
+    hourly_pred = pd.Series(y_pred, index=test_clean['train_volume_hour']).groupby(level=0).sum()
+    r2_hourly = r2_score(hourly_test, hourly_pred)
 
 
     # -------------------- Evaluation --------------------
@@ -109,7 +104,7 @@ def app():
 
     st.write(f"MSE: {mse:.2f}")
     st.write(f"MAE: {mae:.2f}")
-    st.write(f"R²: {r2:.2f}")
+    st.write(f"R²: {r2_hourly:.2f}")
 
     # -------------------- Visualization --------------------
     # Aggregate by hour
