@@ -82,7 +82,7 @@ def app():
 
     # -------------------- Random Forest Model --------------------
     st.subheader("Regression Model: Random Forest")
-    model = RandomForestRegressor(n_estimators=500, random_state=42)
+    model = RandomForestRegressor(n_estimators=200, random_state=42)
     model.fit(X_train, y_train)
     y_pred = model.predict(X_test)
 
