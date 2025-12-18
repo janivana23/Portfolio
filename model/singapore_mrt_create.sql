@@ -104,12 +104,13 @@ CREATE TABLE verification_tokens (
     token VARCHAR(10) NOT NULL,
     expires_at DATETIME NOT NULL,
     used BOOLEAN DEFAULT 0,
-    is_verified BOOLEAN DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 
 );
 
 
+
+ALTER TABLE verification_tokens ADD is_verified BOOLEAN DEFAULT 0;
 ALTER TABLE verification_tokens
     ADD CONSTRAINT verification_tokens_users_fk FOREIGN KEY (user_id)
     REFERENCES users (id);

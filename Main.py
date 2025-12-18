@@ -75,7 +75,7 @@ def verify_token_db(user_id, token_input):
         if datetime.now() > expires_at:
             return "expired"
         elif token_input == token:
-            cur.execute("UPDATE users SET is_verified=1 WHERE id=%s", (user_id,))
+            cur.execute("UPDATE users SET is_verified=1 WHERE user_id=%s", (user_id,))
             cur.execute("UPDATE verification_tokens SET used=1 WHERE user_id=%s AND token=%s", (user_id, token))
             conn.commit()
             return "verified"
