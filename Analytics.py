@@ -99,15 +99,35 @@ def app():
     df["total_volume"] = df["total_volume_in"] + df["total_volume_out"]
 
     # -------------------- Top 10 Busiest Stations --------------------
-    st.subheader("Top 10 Busiest Stations")
+    st.subheader("Hourly Ridership of Top 10 Busiest Stations")
 
-    top10 = df.nlargest(18, "total_volume")
-    fig, ax = plt.subplots(figsize=(10,5))
-    ax.bar(top10["train_name"], top10["total_volume"], color="skyblue")
+    # Identify top 10 stations overall
+    top10 = (
+        df.groupby("train_name")["total_volume"]
+        .sum()
+        .nlargest(10)
+        .index
+    )
+
+    filtered_df = df[df["train_name"].isin(top10)]
+
+    hour_station = (
+        filtered_df
+        .groupby(["train_volume_hour", "train_name"])["total_volume"]
+        .sum()
+        .unstack(fill_value=0)
+    )
+
+    fig, ax = plt.subplots(figsize=(12, 6))
+    hour_station.plot(ax=ax)
+
+    ax.set_xlabel("Hour of Day")
     ax.set_ylabel("Total Volume")
-    ax.set_title("Top 10 Busiest Stations")
-    plt.xticks(rotation=45, ha="right")
+    ax.set_title("Hourly Ridership for Top 10 Stations")
+    ax.legend(title="Station", bbox_to_anchor=(1.05, 1), loc="upper left")
+
     st.pyplot(fig)
+
 
     # -------------------- Tap-in vs Tap-out by Station --------------------
     st.subheader("Tap-in vs Tap-out by Station")
