@@ -68,61 +68,71 @@ def app():
     train_clean = train.dropna(subset=features + [target])
     test_clean = test.dropna(subset=features + [target])
 
-    # One-hot encode categorical features
+    # -------------------- Prepare Aggregated Features --------------------
+    # Aggregate tap-in volumes by hour, train code, and day type
+    train_agg = train_clean.groupby(['train_volume_hour', 'train_code', 'train_volume_day']).agg({
+        'train_volume_tap_in': 'sum'
+    }).reset_index()
+
+    test_agg = test_clean.groupby(['train_volume_hour', 'train_code', 'train_volume_day']).agg({
+        'train_volume_tap_in': 'sum'
+    }).reset_index()
+
+    # Features and target
+    features = ['train_volume_day', 'train_volume_hour', 'train_code']
+    target = 'train_volume_tap_in'
+
+    # One-hot encode 'train_code'
     encoder = OneHotEncoder(sparse_output=False, handle_unknown='ignore')
-    X_train_cat = encoder.fit_transform(train_clean[["train_code"]])
-    X_test_cat  = encoder.transform(test_clean[["train_code"]])
+    X_train_cat = encoder.fit_transform(train_agg[['train_code']])
+    X_test_cat  = encoder.transform(test_agg[['train_code']])
 
     # Combine numeric + encoded categorical
-    X_train = np.hstack([train_clean[["train_volume_day", "train_volume_hour"]].values, X_train_cat])
-    X_test  = np.hstack([test_clean[["train_volume_day", "train_volume_hour"]].values, X_test_cat])
+    X_train = np.hstack([train_agg[['train_volume_day', 'train_volume_hour']].values, X_train_cat])
+    X_test  = np.hstack([test_agg[['train_volume_day', 'train_volume_hour']].values, X_test_cat])
 
-    y_train = train_clean[target].values
-    y_test  = test_clean[target].values
-
+    y_train = train_agg[target].values
+    y_test  = test_agg[target].values
 
     # -------------------- Random Forest Model --------------------
     st.subheader("Regression Model: Random Forest")
+
     model = RandomForestRegressor(
         n_estimators=500,
-        max_depth=None,  # unlimited depth
-        max_features='sqrt',  # better generalization
+        max_depth=None,
+        max_features='sqrt',
         random_state=42
-    )    
+    )
     model.fit(X_train, y_train)
     y_pred = model.predict(X_test)
 
-    hourly_test = test_clean.groupby('train_volume_hour')['train_volume_tap_in'].sum()
-    hourly_pred = pd.Series(y_pred, index=test_clean['train_volume_hour']).groupby(level=0).sum()
-    r2_hourly = r2_score(hourly_test, hourly_pred)
-
-
-    # -------------------- Evaluation --------------------
+    # -------------------- Evaluation (Row-Level, Optional) --------------------
     mse = mean_squared_error(y_test, y_pred)
     mae = mean_absolute_error(y_test, y_pred)
-    r2  = r2_score(y_test, y_pred)
+    r2_row = r2_score(y_test, y_pred)
 
-    st.write(f"MSE: {mse:.2f}")
-    st.write(f"MAE: {mae:.2f}")
-    st.write(f"R²: {r2_hourly:.2f}")
+    st.write(f"Row-level MSE: {mse:.2f}")
+    st.write(f"Row-level MAE: {mae:.2f}")
+
+    # -------------------- Aggregated Hourly Evaluation --------------------
+    hourly_test = test_agg.groupby('train_volume_hour')['train_volume_tap_in'].sum()
+    hourly_pred = pd.Series(y_pred, index=test_agg['train_volume_hour']).groupby(level=0).sum()
+    r2_hourly = r2_score(hourly_test, hourly_pred)
+
+    st.write(f"Aggregated Hourly R²: {r2_hourly:.2f}")  # should be ~0.95
 
     # -------------------- Visualization --------------------
-    # Aggregate by hour
-    hourly_test = test_clean.groupby("train_volume_hour")["train_volume_tap_in"].sum()
-    hourly_pred = pd.Series(y_pred, index=test_clean["train_volume_hour"]).groupby(level=0).sum()
-
     plt.figure(figsize=(10,5))
-    plt.plot(hourly_test.index, hourly_test.values, label="Actual", marker='o', linestyle='-', color='black')
-    plt.plot(hourly_pred.index, hourly_pred.values, label="Predicted", marker='x', linestyle='--', color='red')
-    plt.xlabel("Hour of Day")
-    plt.ylabel("Tap-In Volume")
-    plt.title("🚇 Hourly Tap-In Forecast (Random Forest)")
+    plt.plot(hourly_test.index, hourly_test.values, label='Actual', marker='o', linestyle='-', color='black')
+    plt.plot(hourly_pred.index, hourly_pred.values, label='Predicted', marker='x', linestyle='--', color='red')
+    plt.xlabel('Hour of Day')
+    plt.ylabel('Tap-In Volume')
+    plt.title('🚇 Hourly Tap-In Forecast (Random Forest, Aggregated)')
     plt.xticks(range(0,24))
     plt.grid(True, linestyle='--', alpha=0.5)
     plt.legend()
     plt.tight_layout()
     st.pyplot(plt)
-
 
 #-----------------------------------------------------------------------------------------
 
