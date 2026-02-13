@@ -1,180 +1,15 @@
-# import streamlit as st
-# import pandas as pd
-# import mysql.connector
-# from sklearn.ensemble import RandomForestRegressor
-# from sklearn.preprocessing import OneHotEncoder
-# from sklearn.ensemble import GradientBoostingRegressor
-
-# from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
-# import numpy as np
-# import matplotlib.pyplot as plt
-
-# def app():
-#     # -------------------- Database Connection --------------------
-#     DB_USER = st.secrets["mysql"]["user"]
-#     DB_PASSWORD = st.secrets["mysql"]["password"]
-#     DB_HOST = st.secrets["mysql"]["host"]
-#     DB_NAME = st.secrets["mysql"]["database"]
-#     DB_PORT = 3306
-
-#     conn = mysql.connector.connect(
-#         user=DB_USER,
-#         password=DB_PASSWORD,
-#         host=DB_HOST,
-#         database=DB_NAME,
-#         port=DB_PORT
-#     )
-
-#     @st.cache_data
-#     def run_query(query, listdtype):
-#         cur = conn.cursor()
-#         cur.execute(query)
-#         cols = [col[0] for col in cur.description]
-#         rows = cur.fetchall()
-#         df = pd.DataFrame(rows, columns=cols)
-#         df.columns = df.columns.str.lower()
-#         for col, dtype in listdtype:
-#             if dtype in ["float", "int"]:
-#                 df[col] = pd.to_numeric(df[col], errors="coerce")
-#             elif dtype == "datetime":
-#                 df[col] = pd.to_datetime(df[col], errors="coerce")
-#         return df
-
-#     # -------------------- Load Data --------------------
-#     query = "SELECT * FROM TRAIN_VOLUME order by train_volume_year_month;"
-#     listdtype = [("train_volume_tap_in", "int"), ("train_volume_tap_out", "int")]
-#     df = run_query(query, listdtype)
-
-#     st.title("🚇 Singapore Train Station Modelling Analytics")
-
-#     # Encode day type
-#     df["train_volume_day"] = df["train_volume_day"].map({"WEEKDAY": 0, "WEEKENDS/HOLIDAY": 1})
-#     df["train_volume_year_month"] = pd.to_datetime(df["train_volume_year_month"])
-
-#     # Split by last 2 months
-#     months = df["train_volume_year_month"].dt.to_period("M").unique()
-#     if len(months) < 2:
-#         st.error("❌ Not enough months to split train/test")
-#         return
-
-#     train_month, test_month = months[-2], months[-1]
-#     train = df[df["train_volume_year_month"].dt.to_period("M") == train_month]
-#     test  = df[df["train_volume_year_month"].dt.to_period("M") == test_month]
-
-#     # -------------------- Prepare Features --------------------
-#     features = ["train_volume_day", "train_volume_hour", "train_code"]
-#     target = "train_volume_tap_in"
-
-#     train_clean = train.dropna(subset=features + [target])
-#     test_clean = test.dropna(subset=features + [target])
-
-#     # One-hot encode categorical features
-#     encoder = OneHotEncoder(sparse_output=False, handle_unknown='ignore')
-#     X_train_cat = encoder.fit_transform(train_clean[["train_code"]])
-#     X_test_cat  = encoder.transform(test_clean[["train_code"]])
-
-#     # Combine numeric + encoded categorical
-#     X_train = np.hstack([train_clean[["train_volume_day", "train_volume_hour"]].values, X_train_cat])
-#     X_test  = np.hstack([test_clean[["train_volume_day", "train_volume_hour"]].values, X_test_cat])
-
-#     y_train = train_clean[target].values
-#     y_test  = test_clean[target].values
-
-
-#     # -------------------- Random Forest Model --------------------
-#     st.subheader("Regression Model: Random Forest")
-#     model = RandomForestRegressor(
-#         n_estimators=500,
-#         max_depth=None,  # unlimited depth
-#         max_features='sqrt',  # better generalization
-#         random_state=42
-#     )    
-#     model.fit(X_train, y_train)
-#     y_pred = model.predict(X_test)
-    
-
-#     # -------------------- Evaluation --------------------
-#     mse = mean_squared_error(y_test, y_pred)
-#     mae = mean_absolute_error(y_test, y_pred)
-#     r2  = r2_score(y_test, y_pred)
-
-#     st.write(f"MSE: {mse:.2f}")
-#     st.write(f"MAE: {mae:.2f}")
-#     st.write(f"R²: {r2:.2f}")
-
-#     # -------------------- Visualization --------------------
-#     # Aggregate by hour
-#     hourly_test = test_clean.groupby("train_volume_hour")["train_volume_tap_in"].sum()
-#     hourly_pred = pd.Series(y_pred, index=test_clean["train_volume_hour"]).groupby(level=0).sum()
-
-#     plt.figure(figsize=(10,5))
-#     plt.plot(hourly_test.index, hourly_test.values, label="Actual", marker='o', linestyle='-', color='black')
-#     plt.plot(hourly_pred.index, hourly_pred.values, label="Predicted", marker='x', linestyle='--', color='red')
-#     plt.xlabel("Hour of Day")
-#     plt.ylabel("Tap-In Volume")
-#     plt.title("🚇 Hourly Tap-In Forecast (Random Forest)")
-#     plt.xticks(range(0,24))
-#     plt.grid(True, linestyle='--', alpha=0.5)
-#     plt.legend()
-#     plt.tight_layout()
-#     st.pyplot(plt)
-
-
-# #-----------------------------------------------------------------------------------------
-
-# # -------------------- Gradient Boosting Model --------------------
-#     st.subheader("Regression Model: Gradient Boosting")
-#     model = GradientBoostingRegressor(
-#         n_estimators=500, 
-#         learning_rate=0.1, 
-#         max_depth=10, 
-#         random_state=42
-#     )
-#     model.fit(X_train, y_train)
-#     y_pred = model.predict(X_test)
-
-#     # -------------------- Evaluation --------------------
-#     mse = mean_squared_error(y_test, y_pred)
-#     mae = mean_absolute_error(y_test, y_pred)
-#     r2  = r2_score(y_test, y_pred)
-
-#     st.write(f"MSE: {mse:.2f}")
-#     st.write(f"MAE: {mae:.2f}")
-#     st.write(f"R²: {r2:.2f}")
-
-#     # -------------------- Visualization --------------------
-#     # Aggregate by hour
-#     hourly_test = test_clean.groupby("train_volume_hour")["train_volume_tap_in"].sum()
-#     hourly_pred = pd.Series(y_pred, index=test_clean["train_volume_hour"]).groupby(level=0).sum()
-
-#     plt.figure(figsize=(10,5))
-#     plt.plot(hourly_test.index, hourly_test.values, label="Actual", marker='o', linestyle='-', color='black')
-#     plt.plot(hourly_pred.index, hourly_pred.values, label="Predicted", marker='x', linestyle='--', color='red')
-#     plt.xlabel("Hour of Day")
-#     plt.ylabel("Tap-In Volume")
-#     plt.title("🚇 Hourly Tap-In Forecast (Gradient Boosting)")
-#     plt.xticks(range(0,24))
-#     plt.grid(True, linestyle='--', alpha=0.5)
-#     plt.legend()
-#     plt.tight_layout()
-#     st.pyplot(plt)
-
-
 import streamlit as st
 import pandas as pd
-import numpy as np
 import mysql.connector
-import matplotlib.pyplot as plt
-
+from sklearn.ensemble import RandomForestRegressor
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.ensemble import GradientBoostingRegressor
-from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 
+from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
+import numpy as np
+import matplotlib.pyplot as plt
 
 def app():
-
-    st.title("🚇 Singapore Train Station Modelling Analytics")
-
     # -------------------- Database Connection --------------------
     DB_USER = st.secrets["mysql"]["user"]
     DB_PASSWORD = st.secrets["mysql"]["password"]
@@ -191,115 +26,135 @@ def app():
     )
 
     @st.cache_data
-    def run_query(query):
+    def run_query(query, listdtype):
         cur = conn.cursor()
         cur.execute(query)
         cols = [col[0] for col in cur.description]
         rows = cur.fetchall()
         df = pd.DataFrame(rows, columns=cols)
         df.columns = df.columns.str.lower()
+        for col, dtype in listdtype:
+            if dtype in ["float", "int"]:
+                df[col] = pd.to_numeric(df[col], errors="coerce")
+            elif dtype == "datetime":
+                df[col] = pd.to_datetime(df[col], errors="coerce")
         return df
 
     # -------------------- Load Data --------------------
-    query = "SELECT * FROM TRAIN_VOLUME ORDER BY train_volume_year_month;"
-    df = run_query(query)
+    query = "SELECT * FROM TRAIN_VOLUME order by train_volume_year_month;"
+    listdtype = [("train_volume_tap_in", "int"), ("train_volume_tap_out", "int")]
+    df = run_query(query, listdtype)
 
-    df["train_volume_year_month"] = pd.to_datetime(df["train_volume_year_month"])
-    df["train_volume_tap_in"] = pd.to_numeric(df["train_volume_tap_in"], errors="coerce")
-    df["train_volume_hour"] = pd.to_numeric(df["train_volume_hour"], errors="coerce")
+    st.title("🚇 Singapore Train Station Modelling Analytics")
 
     # Encode day type
-    df["train_volume_day"] = df["train_volume_day"].map({
-        "WEEKDAY": 0,
-        "WEEKENDS/HOLIDAY": 1
-    })
+    df["train_volume_day"] = df["train_volume_day"].map({"WEEKDAY": 0, "WEEKENDS/HOLIDAY": 1})
+    df["train_volume_year_month"] = pd.to_datetime(df["train_volume_year_month"])
 
-    # Cyclical hour encoding (safe + important)
-    df["hour_sin"] = np.sin(2 * np.pi * df["train_volume_hour"] / 24)
-    df["hour_cos"] = np.cos(2 * np.pi * df["train_volume_hour"] / 24)
-
-    df = df.dropna()
-
-    # -------------------- Train/Test Split --------------------
+    # Split by last 2 months
     months = df["train_volume_year_month"].dt.to_period("M").unique()
-
     if len(months) < 2:
-        st.error("❌ Not enough months.")
+        st.error("❌ Not enough months to split train/test")
         return
 
-    train_month = months[-2]
-    test_month = months[-1]
-
+    train_month, test_month = months[-2], months[-1]
     train = df[df["train_volume_year_month"].dt.to_period("M") == train_month]
-    test = df[df["train_volume_year_month"].dt.to_period("M") == test_month]
+    test  = df[df["train_volume_year_month"].dt.to_period("M") == test_month]
 
-    # -------------------- Features --------------------
-    numeric_features = [
-        "train_volume_day",
-        "hour_sin",
-        "hour_cos"
-    ]
-
+    # -------------------- Prepare Features --------------------
+    features = ["train_volume_day", "train_volume_hour", "train_code"]
     target = "train_volume_tap_in"
 
-    encoder = OneHotEncoder(sparse_output=False, handle_unknown="ignore")
+    train_clean = train.dropna(subset=features + [target])
+    test_clean = test.dropna(subset=features + [target])
 
-    X_train_cat = encoder.fit_transform(train[["train_code"]])
-    X_test_cat = encoder.transform(test[["train_code"]])
+    # One-hot encode categorical features
+    encoder = OneHotEncoder(sparse_output=False, handle_unknown='ignore')
+    X_train_cat = encoder.fit_transform(train_clean[["train_code"]])
+    X_test_cat  = encoder.transform(test_clean[["train_code"]])
 
-    X_train_num = train[numeric_features].values
-    X_test_num = test[numeric_features].values
+    # Combine numeric + encoded categorical
+    X_train = np.hstack([train_clean[["train_volume_day", "train_volume_hour"]].values, X_train_cat])
+    X_test  = np.hstack([test_clean[["train_volume_day", "train_volume_hour"]].values, X_test_cat])
 
-    X_train = np.hstack([X_train_num, X_train_cat])
-    X_test = np.hstack([X_test_num, X_test_cat])
+    y_train = train_clean[target].values
+    y_test  = test_clean[target].values
 
-    y_train = train[target].values
-    y_test = test[target].values
 
-    # -------------------- Model --------------------
-    st.subheader("🚀 HistGradientBoosting Model")
+    # -------------------- Random Forest Model --------------------
+    st.subheader("Regression Model: Random Forest")
+    model = RandomForestRegressor(
+        n_estimators=500,
+        max_depth=None,  # unlimited depth
+        max_features='sqrt',  # better generalization
+        random_state=42
+    )    
+    model.fit(X_train, y_train)
+    y_pred = model.predict(X_test)
+    
 
+    # -------------------- Evaluation --------------------
+    mse = mean_squared_error(y_test, y_pred)
+    mae = mean_absolute_error(y_test, y_pred)
+    r2  = r2_score(y_test, y_pred)
+
+    st.write(f"MSE: {mse:.2f}")
+    st.write(f"MAE: {mae:.2f}")
+    st.write(f"R²: {r2:.2f}")
+
+    # -------------------- Visualization --------------------
+    # Aggregate by hour
+    hourly_test = test_clean.groupby("train_volume_hour")["train_volume_tap_in"].sum()
+    hourly_pred = pd.Series(y_pred, index=test_clean["train_volume_hour"]).groupby(level=0).sum()
+
+    plt.figure(figsize=(10,5))
+    plt.plot(hourly_test.index, hourly_test.values, label="Actual", marker='o', linestyle='-', color='black')
+    plt.plot(hourly_pred.index, hourly_pred.values, label="Predicted", marker='x', linestyle='--', color='red')
+    plt.xlabel("Hour of Day")
+    plt.ylabel("Tap-In Volume")
+    plt.title("🚇 Hourly Tap-In Forecast (Random Forest)")
+    plt.xticks(range(0,24))
+    plt.grid(True, linestyle='--', alpha=0.5)
+    plt.legend()
+    plt.tight_layout()
+    st.pyplot(plt)
+
+
+#-----------------------------------------------------------------------------------------
+
+# -------------------- Gradient Boosting Model --------------------
+    st.subheader("Regression Model: Gradient Boosting")
     model = GradientBoostingRegressor(
-        max_iter=500,
-        learning_rate=0.1,
-        max_depth=8,
+        n_estimators=500, 
+        learning_rate=0.1, 
+        max_depth=10, 
         random_state=42
     )
-
     model.fit(X_train, y_train)
     y_pred = model.predict(X_test)
 
     # -------------------- Evaluation --------------------
-    def mape(y_true, y_pred):
-        return np.mean(np.abs((y_true - y_pred) / y_true)) * 100
-
     mse = mean_squared_error(y_test, y_pred)
-    rmse = np.sqrt(mse)
     mae = mean_absolute_error(y_test, y_pred)
-    r2 = r2_score(y_test, y_pred)
-    mape_score = mape(y_test, y_pred)
+    r2  = r2_score(y_test, y_pred)
 
+    st.write(f"MSE: {mse:.2f}")
     st.write(f"MAE: {mae:.2f}")
-    st.write(f"RMSE: {rmse:.2f}")
-    st.write(f"R²: {r2:.3f}")
-    st.write(f"MAPE: {mape_score:.2f}%")
+    st.write(f"R²: {r2:.2f}")
 
     # -------------------- Visualization --------------------
-    hourly_actual = test.groupby("train_volume_hour")[target].sum()
-    hourly_pred = pd.Series(
-        y_pred,
-        index=test["train_volume_hour"]
-    ).groupby(level=0).sum()
+    # Aggregate by hour
+    hourly_test = test_clean.groupby("train_volume_hour")["train_volume_tap_in"].sum()
+    hourly_pred = pd.Series(y_pred, index=test_clean["train_volume_hour"]).groupby(level=0).sum()
 
-    plt.figure(figsize=(10, 5))
-    plt.plot(hourly_actual.index, hourly_actual.values, label="Actual", marker='o')
-    plt.plot(hourly_pred.index, hourly_pred.values, label="Predicted", linestyle='--')
+    plt.figure(figsize=(10,5))
+    plt.plot(hourly_test.index, hourly_test.values, label="Actual", marker='o', linestyle='-', color='black')
+    plt.plot(hourly_pred.index, hourly_pred.values, label="Predicted", marker='x', linestyle='--', color='red')
     plt.xlabel("Hour of Day")
     plt.ylabel("Tap-In Volume")
-    plt.title("🚇 Hourly Forecast")
-    plt.xticks(range(0, 24))
-    plt.grid(True, alpha=0.3)
+    plt.title("🚇 Hourly Tap-In Forecast (Gradient Boosting)")
+    plt.xticks(range(0,24))
+    plt.grid(True, linestyle='--', alpha=0.5)
     plt.legend()
     plt.tight_layout()
-
     st.pyplot(plt)
