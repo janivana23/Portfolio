@@ -173,7 +173,7 @@ from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 
 def app():
 
-    st.title("🚇 Singapore Train Station Demand Forecasting")
+    st.title("🚇 Singapore Train Station Modelling Analytics")
 
     # -------------------- Database Connection --------------------
     DB_USER = st.secrets["mysql"]["user"]
@@ -204,7 +204,6 @@ def app():
     query = "SELECT * FROM TRAIN_VOLUME ORDER BY train_volume_year_month;"
     df = run_query(query)
 
-    # -------------------- Data Preparation --------------------
     df["train_volume_year_month"] = pd.to_datetime(df["train_volume_year_month"])
     df["train_volume_tap_in"] = pd.to_numeric(df["train_volume_tap_in"], errors="coerce")
     df["train_volume_hour"] = pd.to_numeric(df["train_volume_hour"], errors="coerce")
@@ -215,39 +214,17 @@ def app():
         "WEEKENDS/HOLIDAY": 1
     })
 
-    # Sort properly
-    df = df.sort_values(["train_code", "train_volume_year_month", "train_volume_hour"])
-
-    # -------------------- Feature Engineering --------------------
-
-    # Cyclical hour encoding
+    # Cyclical hour encoding (safe + important)
     df["hour_sin"] = np.sin(2 * np.pi * df["train_volume_hour"] / 24)
     df["hour_cos"] = np.cos(2 * np.pi * df["train_volume_hour"] / 24)
 
-    # Lag features
-    df["lag_1"] = df.groupby("train_code")["train_volume_tap_in"].shift(1)
-    df["lag_24"] = df.groupby("train_code")["train_volume_tap_in"].shift(24)
-
-    # Rolling mean (previous 24 hours)
-    df["rolling_mean_24"] = (
-        df.groupby("train_code")["train_volume_tap_in"]
-          .shift(1)
-          .rolling(24)
-          .mean()
-    )
-
-    # Drop missing values created by lags
     df = df.dropna()
 
-    if df.empty:
-        st.error("❌ Not enough data after feature engineering.")
-        return
-
-    # -------------------- Train / Test Split --------------------
+    # -------------------- Train/Test Split --------------------
     months = df["train_volume_year_month"].dt.to_period("M").unique()
 
     if len(months) < 2:
-        st.error("❌ Not enough months to split train/test.")
+        st.error("❌ Not enough months.")
         return
 
     train_month = months[-2]
@@ -257,25 +234,21 @@ def app():
     test = df[df["train_volume_year_month"].dt.to_period("M") == test_month]
 
     # -------------------- Features --------------------
-    features_numeric = [
+    numeric_features = [
         "train_volume_day",
         "hour_sin",
-        "hour_cos",
-        "lag_1",
-        "lag_24",
-        "rolling_mean_24"
+        "hour_cos"
     ]
 
     target = "train_volume_tap_in"
 
-    # One-hot encode station
-    encoder = OneHotEncoder(sparse_output=False, handle_unknown='ignore')
+    encoder = OneHotEncoder(sparse_output=False, handle_unknown="ignore")
 
     X_train_cat = encoder.fit_transform(train[["train_code"]])
     X_test_cat = encoder.transform(test[["train_code"]])
 
-    X_train_num = train[features_numeric].values
-    X_test_num = test[features_numeric].values
+    X_train_num = train[numeric_features].values
+    X_test_num = test[numeric_features].values
 
     X_train = np.hstack([X_train_num, X_train_cat])
     X_test = np.hstack([X_test_num, X_test_cat])
@@ -284,13 +257,12 @@ def app():
     y_test = test[target].values
 
     # -------------------- Model --------------------
-    st.subheader("🚀 Advanced Gradient Boosting Model")
+    st.subheader("🚀 HistGradientBoosting Model")
 
     model = HistGradientBoostingRegressor(
-        max_iter=800,
-        learning_rate=0.05,
-        max_depth=10,
-        l2_regularization=0.1,
+        max_iter=500,
+        learning_rate=0.1,
+        max_depth=8,
         random_state=42
     )
 
@@ -324,7 +296,7 @@ def app():
     plt.plot(hourly_pred.index, hourly_pred.values, label="Predicted", linestyle='--')
     plt.xlabel("Hour of Day")
     plt.ylabel("Tap-In Volume")
-    plt.title("🚇 Hourly Tap-In Forecast (Latest Month)")
+    plt.title("🚇 Hourly Forecast")
     plt.xticks(range(0, 24))
     plt.grid(True, alpha=0.3)
     plt.legend()
