@@ -167,7 +167,7 @@ import mysql.connector
 import matplotlib.pyplot as plt
 
 from sklearn.preprocessing import OneHotEncoder
-from sklearn.ensemble import HistGradientBoostingRegressor
+from sklearn.ensemble import GradientBoostingRegressor
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 
 
@@ -259,7 +259,7 @@ def app():
     # -------------------- Model --------------------
     st.subheader("🚀 HistGradientBoosting Model")
 
-    model = HistGradientBoostingRegressor(
+    model = GradientBoostingRegressor(
         max_iter=500,
         learning_rate=0.1,
         max_depth=8,
