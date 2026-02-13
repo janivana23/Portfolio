@@ -1,5 +1,5 @@
 streamlit
-cx_Oracle
+mysql-connector-python
 pandas
 oracledb
 pydeck
