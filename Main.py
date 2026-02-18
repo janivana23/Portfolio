@@ -125,31 +125,37 @@ def is_privileged_user():
     if not st.session_state.get("logged_in"):
         return False
 
-    cur.execute("SELECT email FROM users WHERE username=%s", (st.session_state.username,))
-    result = cur.fetchone()
+    cur.execute(
+        "SELECT email FROM users WHERE username=%s",
+        (st.session_state.username,)
+    )
+    row = cur.fetchone()
 
-    if not result:
+    if not row:
         return False
 
-    user_email = result[0].encode("utf-8")
-    admin_hash = st.secrets["email"]["address"].encode("utf-8")
+    user_email = row[0].encode("utf-8")
+    admin_email_hash = st.secrets["email"]["email_hash"].encode("utf-8")
 
-    return bcrypt.checkpw(user_email, admin_hash)
+    return bcrypt.checkpw(user_email, admin_email_hash)
+
 
 def require_privileged_access(func):
     def wrapper(*args, **kwargs):
-        if is_privileged_user():
-            return func(*args, **kwargs)
+        if not is_privileged_user():
+            st.error("🔒 Restricted feature")
 
-        st.info(
-            "🔒 Advanced features are restricted.\n\n"
-            "To request access, please connect with me on LinkedIn."
-        )
+            st.info(
+                "This feature is limited.\n\n"
+                "Please request access via LinkedIn."
+            )
 
-        st.markdown(
-            f"[Request access via LinkedIn]({st.secrets['email']['linkedin']})",
-            unsafe_allow_html=True
-        )
+            st.markdown(
+                f"[Request access via LinkedIn]({st.secrets['email']['linkedin']})"
+            )
+            return  # ⛔ STOP execution
+
+        return func(*args, **kwargs)
     return wrapper
 
 @require_login
@@ -158,9 +164,6 @@ def upload_page():
     Upload.app()
 
 
-@require_login
-def upload_page():
-    Upload.app()
 # -------------------- Streamlit App --------------------
 
 st.sidebar.title("Main Navigation")
