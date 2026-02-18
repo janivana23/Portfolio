@@ -121,6 +121,43 @@ def require_login(func):
         st.button("Go to Login", on_click=open_auth, args=("Login",))
     return wrapper
 
+def is_privileged_user():
+    if not st.session_state.get("logged_in"):
+        return False
+
+    cur.execute("SELECT email FROM users WHERE username=%s", (st.session_state.username,))
+    result = cur.fetchone()
+
+    if not result:
+        return False
+
+    user_email = result[0].encode("utf-8")
+    admin_hash = st.secrets["email"]["address"].encode("utf-8")
+
+    return bcrypt.checkpw(user_email, admin_hash)
+
+def require_privileged_access(func):
+    def wrapper(*args, **kwargs):
+        if is_privileged_user():
+            return func(*args, **kwargs)
+
+        st.info(
+            "🔒 Advanced features are restricted.\n\n"
+            "To request access, please connect with me on LinkedIn."
+        )
+
+        st.markdown(
+            f"[Request access via LinkedIn]({st.secrets['email']['linkedin']})",
+            unsafe_allow_html=True
+        )
+    return wrapper
+
+@require_login
+@require_privileged_access
+def upload_page():
+    Upload.app()
+
+
 @require_login
 def upload_page():
     Upload.app()
