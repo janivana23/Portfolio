@@ -4,25 +4,6 @@ import os
 import pandas as pd
 import mysql.connector
 
-DB_USER = st.secrets["mysql"]["user"]
-DB_PASSWORD = st.secrets["mysql"]["password"]
-DB_HOST = st.secrets["mysql"]["host"]
-DB_NAME = st.secrets["mysql"]["database"]
-DB_PORT = 3306
-
-conn = mysql.connector.connect(
-    user=DB_USER,
-    password=DB_PASSWORD,
-    host=DB_HOST,
-    database=DB_NAME,
-    port=DB_PORT
-)
-
-df = pd.read_sql("SELECT * FROM TRAIN_VOLUME order by train_volume_year_month;", conn)
-df.to_csv("trainvolume.csv", index=False)
-
-conn.close()
-
 def app():
     # Path to dataset folder
     DATASET_FOLDER = "dataset"
