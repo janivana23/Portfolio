@@ -53,8 +53,6 @@ def app():
 
     months = sorted(df["train_volume_year_month"].dt.to_period("M").dropna().unique())
 
-    st.write("Detected months:", months)
-
     if len(months) < 2:
         st.warning("⚠️ Not enough months — switching to random split")
 
@@ -93,11 +91,15 @@ def app():
     # -------------------- Random Forest Model --------------------
     st.subheader("Regression Model: Random Forest")
     model = RandomForestRegressor(
-        n_estimators=500,
-        max_depth=None,  # unlimited depth
-        max_features='sqrt',  # better generalization
+        n_estimators=300,          # 500 is overkill here
+        max_depth=15,              # prevent overfitting
+        min_samples_split=10,      # smoother splits
+        min_samples_leaf=5,        # reduce noise
+        max_features=0.7,          # better than sqrt for tabular
+        bootstrap=True,
+        n_jobs=-1,                 # use all CPU cores
         random_state=42
-    )    
+    )
     model.fit(X_train, y_train)
     y_pred = model.predict(X_test)
     
