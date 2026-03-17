@@ -85,7 +85,7 @@ def app():
 
 
     # -------------------- Load aggregated station data --------------------
-    query2 = "SELECT train_code, train_name,train_line_name, SUM(train_volume_tap_in) AS total_volume_in, SUM(train_volume_tap_out) AS total_volume_out, train_volume_hour FROM TRAIN NATURAL JOIN TRAIN_VOLUME GROUP BY train_code, train_name ORDER BY total_volume_in DESC, total_volume_out DESC;"
+    query2 = "SELECT train_code, train_name,train_line_name, SUM(train_volume_tap_in) AS total_volume_in, SUM(train_volume_tap_out) AS total_volume_out, train_volume_hour FROM TRAIN NATURAL JOIN TRAIN_VOLUME GROUP BY  train_code, train_name,train_line_name,train_volume_hour ORDER BY total_volume_in DESC, total_volume_out DESC;"
 
     listdtype = [
         ("total_volume_in", "int"),
