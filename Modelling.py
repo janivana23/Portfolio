@@ -51,15 +51,21 @@ def app():
     df["train_volume_day"] = df["train_volume_day"].map({"weekday": 0, "weekends/holiday": 1})
     df["train_volume_year_month"] = pd.to_datetime(df["train_volume_year_month"])
 
-    # Split by last 2 months
-    months = df["train_volume_year_month"].dt.to_period("M").unique()
-    if len(months) <= 1:
-        st.error("❌ Not enough months to split train/test")
-        return
+    months = sorted(df["train_volume_year_month"].dt.to_period("M").dropna().unique())
 
-    train_month, test_month = months[-2], months[-1]
-    train = df[df["train_volume_year_month"].dt.to_period("M") == train_month]
-    test  = df[df["train_volume_year_month"].dt.to_period("M") == test_month]
+    st.write("Detected months:", months)
+
+    if len(months) < 2:
+        st.warning("⚠️ Not enough months — switching to random split")
+
+        from sklearn.model_selection import train_test_split
+        train, test = train_test_split(df, test_size=0.2, random_state=42)
+
+    else:
+        train_month, test_month = months[-2], months[-1]
+        train = df[df["train_volume_year_month"].dt.to_period("M") == train_month]
+        test  = df[df["train_volume_year_month"].dt.to_period("M") == test_month]
+
 
     # -------------------- Prepare Features --------------------
     features = ["train_volume_day", "train_volume_hour", "train_code"]
