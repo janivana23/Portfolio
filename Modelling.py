@@ -92,7 +92,7 @@ def app():
     # -------------------- Random Forest Model --------------------
     st.subheader("Regression Model: Random Forest")
     model = RandomForestRegressor(
-        n_estimators=500,
+        n_estimators=300,
         max_depth=None,  # unlimited depth
         max_features='sqrt',  # better generalization
         random_state=42
