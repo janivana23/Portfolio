@@ -66,7 +66,14 @@ def app():
         train = df[df["train_volume_year_month"].dt.to_period("M") == train_month]
         test  = df[df["train_volume_year_month"].dt.to_period("M") == test_month]
 
+    st.write("Train shape:", train_clean.shape)
+    st.write("Test shape:", test_clean.shape)
 
+    st.write("Train train_code nulls:", train_clean["train_code"].isna().sum())
+    st.write("Unique train_code (train):", train_clean["train_code"].nunique())
+
+    st.write(train_clean.head())
+    
     # -------------------- Prepare Features --------------------
     features = ["train_volume_day", "train_volume_hour", "train_code"]
     target = "train_volume_tap_in"
