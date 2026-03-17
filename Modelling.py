@@ -48,7 +48,7 @@ def app():
     st.title("🚇 Singapore Train Station Modelling Analytics")
 
     # Encode day type
-    df["train_volume_day"] = df["train_volume_day"].map({"weekday": 0, "weekends/holiday": 1})
+    df["train_volume_day"] = df["train_volume_day"].map({"WEEKDAY": 0, "WEEKENDS/HOLIDAY": 1})
     df["train_volume_year_month"] = pd.to_datetime(df["train_volume_year_month"])
 
     months = sorted(df["train_volume_year_month"].dt.to_period("M").dropna().unique())
@@ -66,20 +66,16 @@ def app():
         train = df[df["train_volume_year_month"].dt.to_period("M") == train_month]
         test  = df[df["train_volume_year_month"].dt.to_period("M") == test_month]
 
-    st.write("Train shape:", train_clean.shape)
-    st.write("Test shape:", test_clean.shape)
 
-    st.write("Train train_code nulls:", train_clean["train_code"].isna().sum())
-    st.write("Unique train_code (train):", train_clean["train_code"].nunique())
-
-    st.write(train_clean.head())
-    
     # -------------------- Prepare Features --------------------
     features = ["train_volume_day", "train_volume_hour", "train_code"]
     target = "train_volume_tap_in"
 
     train_clean = train.dropna(subset=features + [target])
     test_clean = test.dropna(subset=features + [target])
+
+    train_clean["train_code"] = train_clean["train_code"].fillna("UNKNOWN")
+    test_clean["train_code"]  = test_clean["train_code"].fillna("UNKNOWN")
 
     # One-hot encode categorical features
     encoder = OneHotEncoder(sparse_output=False, handle_unknown='ignore')
