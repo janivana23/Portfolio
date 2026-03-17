@@ -41,8 +41,8 @@ def app():
         return df
 
     # -------------------- Load Data --------------------
-    query = "SELECT * FROM train_volume order by train_volume_year_month;"
-    listdtype = [("train_volume_tap_in", "int"), ("train_volume_tap_out", "int")]
+    query = "SELECT * FROM TRAIN_VOLUME order by train_volume_year_month;"
+    listdtype = [("train_volume_tap_in", "int"), ("train_volume_tap_out", "int"), ("train_volume_hour", "int"),("train_volume_year_month", "datetime")]
     df = run_query(query, listdtype)
 
     st.title("🚇 Singapore Train Station Modelling Analytics")
