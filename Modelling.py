@@ -48,7 +48,7 @@ def app():
     st.title("🚇 Singapore Train Station Modelling Analytics")
 
     # Encode day type
-    df["train_volume_day"] = df["train_volume_day"].map({"WEEKDAY": 0, "WEEKENDS/HOLIDAY": 1})
+    df["train_volume_day"] = df["train_volume_day"].map({"weekday": 0, "weekends/holiday": 1})
     df["train_volume_year_month"] = pd.to_datetime(df["train_volume_year_month"])
 
     # Split by last 2 months
