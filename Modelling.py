@@ -41,7 +41,7 @@ def app():
         return df
 
     # -------------------- Load Data --------------------
-    query = "SELECT * FROM TRAIN_VOLUME order by train_volume_year_month;"
+    query = "SELECT * FROM train_volume order by train_volume_year_month;"
     listdtype = [("train_volume_tap_in", "int"), ("train_volume_tap_out", "int")]
     df = run_query(query, listdtype)
 
